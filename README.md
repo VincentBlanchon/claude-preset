@@ -7,11 +7,12 @@ Ce repo contient mes skills et ma config Claude Code, synchronises entre mes mac
 ```
 claude-preset/
   global/
-    CLAUDE.md              <- Regles globales (detection projet vierge, never kill, never crash)
+    CLAUDE.md              <- Regles globales (preferences, detection projet vierge, never kill, sync)
   skills/
-    init-project/SKILL.md  <- /init-project : initialise un projet complet (decouverte, stack, vision, roadmap, preset)
-    design-flow/SKILL.md   <- /design-flow : pipeline UI 5 etapes (design, critique, typeset, polish, audit)
-    feature/SKILL.md       <- /feature : harness pipeline pour features complexes (architect, codex, QA, verify)
+    init-project/SKILL.md  <- Initialise un projet complet (decouverte, stack, vision, roadmap, preset)
+    design-flow/SKILL.md   <- Pipeline UI 5 etapes (design, critique, typeset, polish, audit)
+    feature/SKILL.md       <- Harness pipeline pour features complexes (architect, codex, QA, verify)
+    take-your-time/SKILL.md <- Co-fondateur virtuel : challenge, reflexion produit, planning
 ```
 
 ## Installation sur une nouvelle machine
@@ -22,17 +23,15 @@ cd claude-preset
 ./install.sh
 ```
 
-C'est tout. Les skills sont copies dans `~/.claude/` et disponibles dans tous les projets.
-
 ## Mise a jour
 
-Quand un skill est modifie :
+Quand un skill est modifie sur une machine :
 
 1. Modifier le fichier dans ce repo
 2. `git commit + git push`
 3. Sur l'autre machine : `git pull && ./install.sh`
 
-## Description des skills
+## Skills
 
 ### /init-project
 Initialisation complete d'un nouveau projet en 6 phases :
@@ -52,7 +51,7 @@ Pipeline UI en 5 etapes :
 5. **Audit** — a11y, perf, responsive, anti-patterns
 
 ### /feature
-Harness pipeline automatique pour les features complexes (>3 etapes, 4+ fichiers, nouvelle page, code sensible) :
+Harness pipeline automatique pour les features complexes :
 1. ARCHITECT → plan + contrat qualite
 2. CODEX adversarial review du plan
 3. Validation Vincent
@@ -64,4 +63,7 @@ Harness pipeline automatique pour les features complexes (>3 etapes, 4+ fichiers
 9. SECURITY-AUDITOR si code sensible
 10. PR auto
 
-Ce skill est installe par /init-project dans chaque projet. La copie ici sert de reference.
+### /take-your-time
+Co-fondateur virtuel en 2 modes :
+- **Mode Projet** — creation from scratch (etincelle, marche, business, produit, synthese)
+- **Mode Feature** — ajout sur projet existant (besoin, challenge, approches, risques, plan)
