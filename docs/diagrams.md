@@ -74,67 +74,80 @@ flowchart TD
 
 ## /design-flow
 
-Pipeline UI en 5 etapes sequentielles. Chaque etape a un role different.
+Pipeline UI en 5 etapes. Gate humaine au Visual Review — Claude propose, Vincent decide.
 
 ```mermaid
 flowchart TD
-    START([Page ou composant a construire]) --> E1
+    START([Page ou composant a construire]) --> E0
 
-    subgraph E1["Etape 1 — Frontend Design"]
+    subgraph E0["Etape 0 — Brief"]
+        AUDIENCE[Audience] --> ACTION[Action primaire + CTA]
+        ACTION --> PRIO[Priorite de contenu]
+        PRIO --> CONSTRAINTS[Contraintes DESIGN.md + ui/]
+    end
+
+    E0 --> E1
+
+    subgraph E1["Etape 1 — Build"]
         direction TB
-        READ_DS[Lire DESIGN.md + composants ui/] --> DIRECTION[Choisir direction esthetique BOLD]
-        DIRECTION --> BUILD[Construire l'interface]
+        READ_DS["Lire DESIGN.md + ui/\n+ pages existantes"] --> BUILD[Construire l'interface]
+        BUILD --> SLOP{"Anti-slop check\nCTA visible ? Hierarchie claire ?\nSpecifique au produit ?"}
+        SLOP -->|Non| BUILD
     end
 
     E1 --> E2
 
-    subgraph E2["Etape 2 — Critique"]
+    subgraph E2["Etape 2 — Visual Review"]
         direction TB
-        EVAL["Score /10 sur 5 axes"] --> ISSUES["Issues P0 → P3"]
-        ISSUES --> FIX_P0["Corriger P0 + P1"]
+        LAUNCH["Lancer localhost\nOuvrir dans le navigateur"] --> PASSES["3 passes :\nA. Structure & emphase\nB. Typo & contenu\nC. Finish & etats"]
+        PASSES --> RECO_VR["Recommandations presentees\nCODE NON MODIFIE"]
     end
 
-    E2 --> E3
+    RECO_VR --> GATE_H{"Vincent decide"}
+    GATE_H -->|"ok fais tout"| APPLY[Appliquer corrections]
+    GATE_H -->|"feedback specifique"| APPLY
+    GATE_H -->|"je prefere comme ca"| E3
 
-    subgraph E3["Etape 3 — Typeset"]
+    APPLY --> E2
+
+    subgraph E3["Etape 3 — Technical Audit"]
         direction TB
-        TYPO_CHECK["Echelle, poids, line-height\nletter-spacing, mesure"] --> TYPO_FIX[Corriger dans le code]
+        A11Y[a11y WCAG AA] --> PERF[Performance]
+        PERF --> RESP[Responsive 375/768/1440]
+        RESP --> ANTI[Anti-patterns]
     end
 
     E3 --> E4
 
-    subgraph E4["Etape 4 — Polish"]
+    subgraph E4["Etape 4 — Release Gate"]
         direction TB
-        CHECKLIST["12 points :\nalignement, spacing, etats,\ntransitions, responsive,\nempty states, loading..."] --> PIXEL[Corrections pixel-perfect]
+        CHECK_BRIEF[Brief respecte ?] --> CHECK_DS[Design system respecte ?]
+        CHECK_DS --> CHECK_COH[Coherent avec le projet ?]
+        CHECK_COH --> CHECK_AUDIT[Audit PASS ?]
+        CHECK_AUDIT --> CHECK_VINCENT[Vincent a valide ?]
     end
 
-    E4 --> E5
-
-    subgraph E5["Etape 5 — Audit"]
-        direction TB
-        A11Y[Accessibilite] --> PERF[Performance]
-        PERF --> RESP[Responsive]
-        RESP --> ANTI[Anti-patterns]
-    end
-
-    E5 --> VERDICT{PASS ?}
-    VERDICT -->|Oui| DONE([Ship it])
-    VERDICT -->|"Score < 16/20"| E1
+    E4 --> VERDICT{"Verdict"}
+    VERDICT -->|READY| DONE([Ship it])
+    VERDICT -->|WITH WARNINGS| DONE_W([Ship avec warnings])
+    VERDICT -->|NOT READY| E1
 
     style START fill:#f9a825,color:#000
     style DONE fill:#43a047,color:#fff
+    style DONE_W fill:#ff9800,color:#000
+    style GATE_H fill:#ff5722,color:#fff
+    style E0 fill:#fff9c4,stroke:#f57f17
     style E1 fill:#e3f2fd,stroke:#1565c0
-    style E2 fill:#fff3e0,stroke:#e65100
-    style E3 fill:#f3e5f5,stroke:#6a1b9a
+    style E2 fill:#f3e5f5,stroke:#6a1b9a
+    style E3 fill:#fce4ec,stroke:#b71c1c
     style E4 fill:#e8f5e9,stroke:#2e7d32
-    style E5 fill:#fce4ec,stroke:#b71c1c
 ```
 
 ---
 
 ## /feature
 
-Harness multi-agent pour les features complexes. Chaque agent a un contexte isole.
+Harness multi-agent pour les features complexes. Double review Codex + Opus a chaque etage.
 
 ```mermaid
 flowchart TD
@@ -146,41 +159,50 @@ flowchart TD
         PLAN["plan.md + contrat-qualite.md"]
     end
 
-    ARCH --> CODEX
+    ARCH --> CODEX_PLAN
 
-    subgraph CODEX["2. CODEX — Adversarial Review"]
+    subgraph CODEX_PLAN["2. CODEX — Challenge du plan"]
         CHALLENGE["Challenge le plan\nfaisabilite, risques, alternatives"]
     end
 
-    CODEX --> VALID[3. Vincent valide le plan]
+    CODEX_PLAN --> VALID[3. Vincent valide le plan]
 
     VALID --> UI_CHECK{UI detectee ?}
-    UI_CHECK -->|Oui| REVIEWER
+    UI_CHECK -->|Oui| DESIGN_FLOW
     UI_CHECK -->|Non| DEV
 
-    subgraph REVIEWER["4. REVIEWER — Opus"]
-        DESIGN_PROPS[Propositions design]
+    subgraph DESIGN_FLOW["4. /design-flow"]
+        DF_BRIEF[Brief] --> DF_BUILD[Build]
+        DF_BUILD --> DF_REVIEW["Visual Review\n+ gate humaine"]
+        DF_REVIEW --> DF_AUDIT[Audit + Release Gate]
     end
 
-    REVIEWER --> DEV
+    DESIGN_FLOW --> DEV
 
     subgraph DEV["5. DEVELOPER — Opus"]
         WORKTREE["Git worktree isole"] --> IMPL[Implemente + tests + commit]
     end
 
-    DEV --> QA
+    DEV --> CODEX_REVIEW
 
-    subgraph QA["6. QA — Opus"]
+    subgraph CODEX_REVIEW["6. CODEX — Code review"]
+        CR["Review qualite du code\nRead-only"]
+    end
+
+    CODEX_REVIEW --> DEV_FIX[7. DEVELOPER integre feedback]
+    DEV_FIX --> QA
+
+    subgraph QA["8. QA — Opus"]
         CHECKS["typecheck + lint\ntests + build + review"]
         CHECKS --> VERDICT_QA{PASS ?}
     end
 
-    VERDICT_QA -->|FAIL| DIAG["CODEX diagnostique"] --> DEV
+    VERDICT_QA -->|FAIL| CODEX_DIAG["CODEX diagnostique"] --> DEV
     VERDICT_QA -->|"3x FAIL"| ESCALADE([Escalade a Vincent])
 
     VERDICT_QA -->|PASS| VERIFY
 
-    subgraph VERIFY["8. VERIFY-APP — Opus"]
+    subgraph VERIFY["9. VERIFY-APP — Opus"]
         CU["Computer Use + screenshots"]
         CU --> VISUAL{Problemes visuels ?}
     end
@@ -189,25 +211,32 @@ flowchart TD
     VISUAL -->|Non| SEC_CHECK{Code sensible ?}
 
     SEC_CHECK -->|Oui| SEC
-    SEC_CHECK -->|Non| PR
+    SEC_CHECK -->|Non| CODEX_FINAL
 
-    subgraph SEC["10. SECURITY-AUDITOR — Sonnet"]
+    subgraph SEC["10. SECURITY-AUDITOR — Opus"]
         OWASP[Audit OWASP Top 10]
     end
 
-    SEC --> PR
-    PR([11. PR creee automatiquement])
+    SEC --> CODEX_FINAL
+
+    subgraph CODEX_FINAL["11. CODEX — Adversarial review"]
+        ADV["auth, data loss, race conditions\nrollback safety"]
+    end
+
+    CODEX_FINAL --> PR([12. PR creee automatiquement])
 
     style DETECT fill:#f9a825,color:#000
     style PR fill:#43a047,color:#fff
     style ESCALADE fill:#b71c1c,color:#fff
     style ARCH fill:#e3f2fd,stroke:#1565c0
-    style CODEX fill:#fff3e0,stroke:#e65100
+    style CODEX_PLAN fill:#fff3e0,stroke:#e65100
+    style CODEX_REVIEW fill:#fff3e0,stroke:#e65100
+    style CODEX_FINAL fill:#fff3e0,stroke:#e65100
     style DEV fill:#e8f5e9,stroke:#2e7d32
     style QA fill:#fce4ec,stroke:#b71c1c
     style VERIFY fill:#f3e5f5,stroke:#6a1b9a
     style SEC fill:#e0f7fa,stroke:#00695c
-    style REVIEWER fill:#fff9c4,stroke:#f57f17
+    style DESIGN_FLOW fill:#fff9c4,stroke:#f57f17
 ```
 
 ---
@@ -269,7 +298,7 @@ flowchart LR
 
     NEED -->|"Nouveau projet\nfrom scratch"| INIT["/init-project\n6 phases"]
     NEED -->|"Reflechir, challenger\nposer les bases"| TYT["/take-your-time\nco-fondateur virtuel"]
-    NEED -->|"Page, modale,\ncomposant UI"| DF["/design-flow\n5 etapes"]
+    NEED -->|"Page, modale,\ncomposant UI"| DF["/design-flow\n5 etapes + gate humaine"]
     NEED -->|"Feature complexe\n4+ fichiers"| FEAT["/feature\nharness multi-agent"]
 
     INIT -.->|"Premiere feature UI"| DF

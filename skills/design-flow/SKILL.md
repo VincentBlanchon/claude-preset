@@ -1,6 +1,6 @@
 ---
 name: design-flow
-description: Pipeline UI complet en 5 etapes (design, critique, typeset, polish, audit). Utiliser quand Vincent demande de creer ou modifier une page, modale, dashboard, formulaire, ou tout composant avec une UI visible.
+description: Pipeline UI complet en 5 etapes (brief, build, visual review, audit, release gate). Utiliser quand Vincent demande de creer ou modifier une page, modale, dashboard, formulaire, ou tout composant avec une UI visible.
 ---
 
 # /design-flow — Pipeline UI en 5 etapes
@@ -8,114 +8,125 @@ description: Pipeline UI complet en 5 etapes (design, critique, typeset, polish,
 Pipeline complet pour creer ou ameliorer une interface. Execute les 5 etapes dans l'ordre.
 Si un argument est fourni (ex: `/design-flow page pricing`), l'appliquer a cette page/composant.
 
-IMPORTANT: Si le projet a un fichier DESIGN.md (tokens, palette, typo, spacing), il prime TOUJOURS sur les suggestions de chaque etape. Le lire en premier.
-IMPORTANT: Si le projet a un dossier src/components/ui/, toujours reutiliser les composants existants.
+## Regles absolues
+
+- **DESIGN.md prime sur tout.** Si le projet a un fichier DESIGN.md (tokens, palette, typo, spacing, radii, shadows), le lire en premier et le respecter a la lettre.
+- **Reutiliser les composants existants.** Si le projet a un dossier src/components/ui/, utiliser les composants existants. Ne jamais recreer un Button, Card, Input, Badge ou Modal.
+- **Coherence avec l'existant.** Avant de coder, lire les pages existantes du projet pour comprendre les patterns en place (structure de sections, style de headings, spacing entre blocs). Le nouveau code doit s'inscrire dans l'existant, pas partir d'une page blanche.
+- **Classes et variables existantes.** Verifier les classes CSS / variables Tailwind / tokens deja utilises dans le projet. Ne pas inventer de nouvelles valeurs quand il en existe deja.
 
 ---
 
-## Etape 1 — FRONTEND DESIGN (Build)
+## Etape 0 — BRIEF
 
-Tu es un designer frontend senior. Construis l'interface.
+Avant de coder quoi que ce soit, etablir un brief minimum :
+- **Audience** : pour qui est cette page/composant ?
+- **Action primaire** : que doit faire l'utilisateur ?
+- **CTA principal** : quel est le call-to-action dominant ?
+- **Priorite de contenu** : quelles infos en premier, lesquelles secondaires ?
+- **Contraintes** : tokens DESIGN.md, composants ui/ disponibles, references visuelles
+
+Si Vincent fournit ces infos dans sa demande, les extraire. Sinon, poser les questions manquantes rapidement — pas un interrogatoire, juste ce qui manque pour ne pas designer dans le vide.
+
+---
+
+## Etape 1 — BUILD
+
+Construire l'interface.
 
 ### Avant de coder
-- Lis DESIGN.md si present (tokens, palette, typo, spacing, radii, shadows)
-- Lis les composants ui/ existants dans le projet
-- Comprends le contexte : quel probleme cette interface resout ? Pour qui ?
+- Lire DESIGN.md
+- Lire les composants ui/ existants
+- Parcourir les pages existantes du projet (patterns, styles, structure)
+- Relire le brief
 
 ### Direction esthetique
-Choisis une direction BOLD et intentionnelle. Pas de design generique.
-- **Typographie** : polices distinctives et memorables. JAMAIS Inter, Roboto, Arial, system fonts generiques
-- **Couleurs** : palette cohesive avec des accents forts. Pas de violet-degrade-sur-blanc cliche
-- **Motion** : animations pour les micro-interactions. CSS-only prefere. Staggered reveals > micro-interactions eparses
-- **Composition** : layouts inattendus, asymetrie, overlap, grids casses, espace negatif genereux
-- **Fond & details** : atmosphere et profondeur (gradients, textures, patterns, grain, ombres)
+Si DESIGN.md definit le style : le respecter. Sinon, choisir une direction intentionnelle :
+- **Typographie** : polices distinctives. JAMAIS Inter, Roboto, Arial, system fonts generiques
+- **Couleurs** : palette cohesive avec des accents forts
+- **Motion** : animations pour les micro-interactions. CSS-only prefere
+- **Composition** : espace negatif genereux, hierarchie claire
+- **Fond & details** : atmosphere et profondeur quand pertinent
+
+### Anti-slop — Criteres de qualite
+Le design doit repondre OUI a ces questions :
+- Le CTA principal est-il visible sans scroller ?
+- La hierarchie est-elle claire (on sait ou regarder en premier) ?
+- Y a-t-il au moins un choix de design specifique au produit (pas interchangeable avec 20 autres startups) ?
+- Les composants sont-ils utilises parce qu'ils servent le contenu, pas parce qu'ils "font premium" ?
+
+Si la reponse est NON a l'une d'entre elles : corriger avant de passer a l'etape suivante.
 
 ### Implementation
 - Code production-ready et fonctionnel
-- Visuellement frappant et memorable
-- Cohesif avec un point de vue esthetique clair
-- Si DESIGN.md existe : respecter ses tokens a la lettre
-- Si composants ui/ existent : les reutiliser, ne pas redesigner
+- Si DESIGN.md existe : respecter ses tokens
+- Si composants ui/ existent : les reutiliser
 
 ---
 
-## Etape 2 — CRITIQUE (Review Design Director)
+## Etape 2 — VISUAL REVIEW
 
-Tu es un directeur artistique senior exigeant. Tu n'as PAS designe cette interface.
+**C'est l'etape collaborative. Claude propose, Vincent decide.**
 
-### Evaluation (score /10)
-Evalue chaque axe sur 10 :
-- **Hierarchie visuelle** : l'oeil sait ou aller en premier ?
-- **Coherence** : tokens, spacing, typo, couleurs respectes partout ?
-- **Impact** : c'est memorable ou generique ?
-- **Fonctionnalite** : ca marche, les interactions sont claires ?
-- **Craft** : les details sont soignes (alignements, spacing, micro-interactions) ?
+### Lancer le rendu
+- Demarrer le serveur de dev (`npm run dev`, `pnpm dev`, ou equivalent)
+- Ouvrir la page dans le navigateur de Vincent (`open http://localhost:...`)
+- Si possible, prendre des screenshots a 375px, 768px, et 1440px
 
-### Issues par priorite
-- **P0 — Bloquant** : casse l'UX, illisible, inaccessible
-- **P1 — Important** : incoherence design system, hierarchie confuse
-- **P2 — Amelioration** : pourrait etre plus raffine, plus impactant
-- **P3 — Nice-to-have** : touches finales, polish supplementaire
+### Analyser et recommander (3 passes)
 
-### Output
+**Passe A — Structure et emphase :**
+- Le focal point est-il clair dans le premier viewport ?
+- La densite est-elle equilibree (pas trop vide, pas trop charge) ?
+- Les sections ont-elles des frontieres claires ?
+- Le copy est-il specifique (pas generique/placeholder) ?
+- Le CTA correspond-il au next step logique de l'utilisateur ?
+
+**Passe B — Typographie et contenu :**
+- L'echelle typographique est-elle harmonieuse ?
+- Les line-heights sont-ils corrects (titres serres, corps aeres) ?
+- Les largeurs de ligne sont-elles dans la zone 45-75 caracteres ?
+- Le contenu est-il credible et coherent avec le produit ?
+
+**Passe C — Finish et etats :**
+- Les etats interactifs sont-ils definis (hover, focus, active, disabled) ?
+- Les transitions sont-elles fluides (150-300ms, ease-out) ?
+- Les empty states et loading states sont-ils geres ?
+- Le responsive tient-il a 375px et 768px ?
+- Les textes longs sont-ils geres (ellipsis, line-clamp) ?
+
+### Presenter les recommandations
+
+Afficher les recommandations a Vincent avec ce format :
+
 ```
-CRITIQUE: [score global /10]
-P0: [liste ou "aucun"]
-P1: [liste ou "aucun"]
-P2: [liste]
-P3: [liste]
+VISUAL REVIEW — [Page/Composant]
+
+Localhost : http://localhost:[port]/[path]
+
+Passe A — Structure :
+- [observations + recommandations]
+
+Passe B — Typo & contenu :
+- [observations + recommandations]
+
+Passe C — Finish :
+- [observations + recommandations]
 ```
 
-Corrige les P0 et P1 immediatement. Propose les P2.
+**NE PAS MODIFIER LE CODE.** Attendre le retour de Vincent.
+Vincent regarde le localhost de son cote, lit les recommandations, et reagit :
+- "ok, fais tout" → appliquer toutes les recommandations
+- "le hero est trop charge" → integrer ce feedback + les recommandations validees
+- "non, je prefere comme ca" → ne pas toucher ce point
+
+Apres les corrections, relancer le localhost si besoin et verifier visuellement.
 
 ---
 
-## Etape 3 — TYPESET (Typographie & Hierarchie)
+## Etape 3 — TECHNICAL AUDIT
 
-Tu es un typographe senior. Affine la typographie et la hierarchie de l'information.
-
-### Check systematique
-- **Echelle typographique** : les tailles forment-elles une echelle harmonieuse ? (ratio 1.2-1.5)
-- **Poids** : utilise-t-on assez de variation (light/regular/medium/semibold/bold) ?
-- **Line-height** : titres serres (1.1-1.2), corps aeres (1.5-1.7) ?
-- **Letter-spacing** : titres resserres (-0.01 a -0.03em), small text espace (+0.02em) ?
-- **Mesure** : largeur de ligne optimale (45-75 caracteres pour le corps) ?
-- **Hierarchie** : 3 niveaux max clairement distincts (titre, sous-titre, corps) ?
-- **Contraste** : suffisamment de difference entre les niveaux ?
-- **Rythme vertical** : spacing coherent entre les blocs de texte ?
-
-### Actions
-Corrige les problemes trouves directement dans le code.
-Ne change PAS les polices definies dans DESIGN.md.
-
----
-
-## Etape 4 — POLISH (Qualite finale)
-
-Tu es un designer pixel-perfect obsede par les details. Derniere passe avant l'audit.
-
-### Checklist
-- [ ] **Alignement** : tout est aligne sur la grille, pas de decalages de 1-2px
-- [ ] **Spacing** : utilise uniquement les valeurs du systeme (4, 8, 12, 16, 24, 32, 48, 64)
-- [ ] **Etats** : hover, focus, active, disabled — tous definis et visuellement distincts
-- [ ] **Transitions** : toutes les interactions ont des transitions fluides (150-300ms, ease-out)
-- [ ] **Bordures & ombres** : coherentes avec le design system
-- [ ] **Icones** : taille et style coherents, alignees optiquement
-- [ ] **Couleurs** : pas de couleurs hardcodees, tout via tokens/variables CSS
-- [ ] **Responsive** : verifie a 375px, 768px, 1440px — pas de debordement, texte lisible
-- [ ] **Dark mode** : si applicable, verifie que les contrastes tiennent
-- [ ] **Empty states** : les etats vides ont un message et un CTA
-- [ ] **Loading states** : les chargements sont visibles (skeleton, spinner)
-- [ ] **Truncation** : les textes longs sont geres (ellipsis, line-clamp)
-
-### Actions
-Corrige chaque point qui ne passe pas. Pas de compromis sur le pixel-perfect.
-
----
-
-## Etape 5 — AUDIT (Technique)
-
-Tu es un auditeur technique frontend. Derniere verification avant livraison.
+Derniere verification technique avant livraison.
 
 ### Accessibilite (a11y)
 - Contrastes WCAG AA (4.5:1 texte normal, 3:1 gros texte)
@@ -133,7 +144,7 @@ Tu es un auditeur technique frontend. Derniere verification avant livraison.
 - Animations via transform/opacity uniquement (pas de top/left/width)
 
 ### Responsive
-- Test a 375px, 768px, 1440px
+- Verifie a 375px, 768px, 1440px (si screenshots disponibles, les utiliser)
 - Pas de scroll horizontal
 - Touch targets >= 44x44px sur mobile
 - Texte lisible sans zoom sur mobile (>= 16px)
@@ -144,30 +155,46 @@ Tu es un auditeur technique frontend. Derniere verification avant livraison.
 - Pas de magic numbers (valeurs hardcodees sans token)
 - Pas de duplication de styles (extraire dans un composant)
 - Pas de console.log oublies
+- Pas de couleurs hardcodees — tout via tokens/variables CSS
 
 ### Output
 ```
 AUDIT: [PASS/FAIL]
-a11y:        [OK/X issues]
-Performance: [OK/X issues]
-Responsive:  [OK/X issues]
+a11y:         [OK/X issues]
+Performance:  [OK/X issues]
+Responsive:   [OK/X issues]
 Anti-patterns: [OK/X issues]
 ```
 
-Corrige les issues FAIL. Liste les warnings.
+Corriger les issues. Lister les warnings.
 
 ---
 
-## Resume final
+## Etape 4 — RELEASE GATE
 
-A la fin du pipeline, affiche :
+Verification finale. Pas de "COMPLETE" automatique.
+
+### Checklist
+- [ ] Le brief initial est-il respecte (audience, action, CTA) ?
+- [ ] Le DESIGN.md est-il respecte (tokens, couleurs, typo) ?
+- [ ] Les composants ui/ existants sont-ils reutilises ?
+- [ ] Le style est-il coherent avec les autres pages du projet ?
+- [ ] L'audit technique est-il PASS ?
+- [ ] Vincent a-t-il valide le visuel ?
+
+### Verdict
 
 ```
-DESIGN-FLOW COMPLETE
+RELEASE GATE — [Page/Composant]
 
-Page/Composant: [nom]
-Critique:       [score /10]
-Issues P0:      [resolues/total]
-Issues P1:      [resolues/total]
-Audit:          [PASS/FAIL]
+Brief respecte :     [oui/non]
+Design system :      [oui/non]
+Coherence projet :   [oui/non]
+Audit technique :    [PASS/FAIL]
+Validation Vincent : [oui/non]
+
+Verdict : [READY / READY WITH WARNINGS / NOT READY]
+
+Warnings non resolus :
+- [liste ou "aucun"]
 ```
