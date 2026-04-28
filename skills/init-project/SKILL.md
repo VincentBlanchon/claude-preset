@@ -158,21 +158,13 @@ UNE FOIS les Phases 1-3 validees, installe tout. Adapte chaque fichier au projet
 git init
 ```
 
-### 4.2 — CLAUDE.md (< 300 lignes)
-Genere un CLAUDE.md adapte au projet. Modele base sur Bridge/ClubHouse + integration Karpathy rules (repo `forrestchang/andrej-karpathy-skills`, ~82k stars GitHub trending #1) + profil non-dev de Vincent :
+### 4.2 — CLAUDE.md projet (< 200 lignes)
+Le CLAUDE.md projet contient **uniquement** ce qui est specifique au projet (stack, workflow, regles metier). Le profil de Vincent + les behavioral guidelines (Karpathy) sont DEJA dans le global `~/.claude/CLAUDE.md` et lus pour tous les projets — ne PAS les dupliquer ici.
+
+Modele base sur Bridge/ClubHouse :
 
 ```markdown
 # [Nom du projet]
-
-## Profil de Vincent (lire AVANT d'agir)
-
-Vincent pilote Claude Code pour coder. Il **n'est PAS developpeur**. Il comprend tres bien le business, le produit, l'architecture macro, l'UX — mais **pas les details d'implementation purs**.
-
-- Sur un **choix technique pur** (lib, pattern, design d'API, structure de dossiers, etc.) : ne pas dumper du jargon. Expliquer le tradeoff en une phrase business / produit, proposer une recommandation claire, demander confirmation. Eviter les "tu prefereres prisma ou drizzle ?" sec — preferer "Pour la couche DB on a deux options : X (plus simple, plus rapide a setup) vs Y (plus type-safe, courbe d'apprentissage). Je recommande X parce que [raison concrete]. OK ?".
-- Sur les **decisions structurantes** (architecture, choix de lib, design pattern) : poser la question, expliquer les options et tradeoffs AVANT d'agir. Diagrammes Mermaid quand l'architecture est complexe.
-- Si Vincent utilise un terme technique : ne pas supposer qu'il le maitrise, faire un rappel rapide en une phrase avec analogie si pertinent.
-- Si Vincent dit "je gere", avancer. S'il pose une question, prendre le temps d'expliquer.
-- Le corriger gentiment si une definition technique est approximative — ca l'aide a progresser.
 
 ## Commandes
 - `[pkg] dev` — dev server
@@ -271,62 +263,6 @@ Ouvrir l'app (Computer Use prioritaire, Playwright fallback). Screenshots.
 
 ### Etape 10 — PR
 Creer la PR avec description claire + screenshots.
-
-## Behavioral guidelines (Karpathy rules) — A APPLIQUER PARTOUT
-
-Reference complete : `veille-tech/veille/claude-code/claude-md-karpathy.md`. Ces 4 regles sont la baseline comportementale. Repo `forrestchang/andrej-karpathy-skills` (~82k stars GitHub, trending #1). **Tradeoff explicite** : ces regles biaisent vers la prudence plutot que la vitesse. Pour les taches triviales (typo, rename, fix une ligne), juger sans appliquer le rituel complet.
-
-### 1. Think before coding — *Don't assume. Don't hide confusion. Surface tradeoffs.*
-
-Avant d'implementer quoi que ce soit :
-- **Enoncer les hypotheses explicitement.** Si incertain → demander, ne pas deviner.
-- **Si plusieurs interpretations existent, les presenter** — ne JAMAIS choisir silencieusement.
-- **Si une approche plus simple existe, le dire.** Push back quand justifie.
-- **Si quelque chose est flou, STOP.** Nommer ce qui est confus. Demander.
-- Toujours surface les tradeoffs (perf vs simplicite, flexibilite vs YAGNI, etc.) AVANT d'implementer.
-
-### 2. Simplicity first — *Minimum code that solves the problem. Nothing speculative.*
-
-- Pas de features au-dela de ce qui a ete demande.
-- Pas d'abstractions pour du code single-use.
-- Pas de "flexibility / configurability" non demandee.
-- Pas d'error handling pour des scenarios qui ne peuvent pas realistically arriver.
-- Si tu ecris 200 lignes la ou 50 suffisent → reecris.
-- **Test mental** : *"Un senior engineer dirait-il que c'est over-engineered ?"* Si oui → simplifier.
-
-### 3. Surgical changes — *Touch only what you must. Clean up only your own mess.*
-
-Quand tu edits du code existant :
-- **Ne pas "improve"** le code adjacent, comments, formatting.
-- **Ne pas refactorer** ce qui n'est pas casse.
-- **Match le style existant**, meme si tu ferais autrement.
-- **Si tu vois du dead code unrelated → le MENTIONNER**, ne pas le delete.
-
-Quand tes changements creent des orphans :
-- Remove imports/variables/functions que **TES** changements ont rendu inutiles.
-- Ne pas remove du dead code preexistant sans demande.
-
-**Test** : *Chaque ligne changee doit retracer directement a la demande de l'user.*
-
-### 4. Goal-driven execution — *Define success criteria. Loop until verified.*
-
-Transformer chaque tache en goal verifiable :
-- "Add validation" → *"Write tests for invalid inputs, then make them pass"*
-- "Fix the bug" → *"Write a test that reproduces it, then make it pass"*
-- "Refactor X" → *"Ensure tests pass before and after"*
-
-Pour les taches multi-step, plan bref avec verify explicite :
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria → loop autonome possible. Weak criteria ("make it work") → besoin de clarifications constantes.
-
-### Comment savoir que ces regles fonctionnent
-
-Selon l'auteur du repo : *"fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come BEFORE implementation rather than after mistakes."*
 
 ## Regles critiques
 
