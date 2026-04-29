@@ -1,6 +1,6 @@
 ---
 name: init-project
-description: Initialise un nouveau projet avec le preset complet (decouverte, stack, vision, roadmap, rules, agents, skills, hooks).
+description: Initialise un nouveau projet avec le preset (decouverte, stack, vision, roadmap, rules, 4 agents, 4 skills, hooks). Le workflow feature complet vit dans le skill global /feature, pas dans le CLAUDE.md projet.
 ---
 
 # /init-project — Initialisation complete d'un nouveau projet
@@ -202,67 +202,14 @@ Fichier cle : `DESIGN.md` (tokens). DESIGN.md prime TOUJOURS sur les suggestions
 
 IMPORTANT: Quand Vincent demande de creer ou modifier une page, modale, dashboard, formulaire, ou tout composant avec une UI visible — lancer automatiquement le pipeline `/design-flow`. Ne pas attendre qu'il le demande explicitement.
 
-## Workflow feature — OBLIGATOIRE
+## Workflow feature
 
-Quand Vincent demande une nouvelle feature ou une modification significative, TOUJOURS suivre ce flow dans l'ordre :
+Pour toute feature non triviale, Claude lance AUTOMATIQUEMENT le skill global `/feature` qui orchestre :
+architect → plan → Codex challenge → branche → implementation → QA → review Codex → verification visuelle → PR.
 
-### Etape 1 — Comprendre (QUESTIONS)
-IMPORTANT: Ne commence JAMAIS a planifier sans avoir compris. Pose des questions.
-- Quel est l'objectif metier ? Pourquoi cette feature ?
-- Qui va l'utiliser ? Quel parcours utilisateur ?
-- Y a-t-il des contraintes specifiques ?
-- Si quelque chose est flou, DEMANDE. Ne devine pas.
+Tu n'as rien a taper — Claude detecte la complexite (plan > 3 etapes, 4+ fichiers, nouvelle page, code sensible touchant auth/paiement/donnees) et lance le pipeline.
 
-### Etape 2 — Rechercher (RESEARCH-FIRST)
-Avant de coder, cherche si une solution existe deja :
-- Dans le codebase existant (un module similaire ? des composants reutilisables ?)
-- Sur GitHub, npm, documentation officielle
-- Ne reinvente pas la roue.
-
-### Etape 3 — Planifier (PLAN MODE)
-Presente un plan structure AVANT de coder :
-- Fichiers a creer/modifier
-- Composants ui/ existants a reutiliser
-- Tables/API concernees
-- Criteres de succes
-Attends la validation de Vincent.
-
-### Etape 4 — Challenge du plan (CODEX) — NE PAS SAUTER
-YOU MUST envoyer le plan a Codex AVANT de demander validation a Vincent.
-Utilise `/codex:rescue` :
-```
-/codex:rescue Analyse ce plan et challenge-le : faisabilite, risques, alternatives plus simples.
-```
-Presente a Vincent : le plan + le feedback Codex + les ajustements faits.
-
-### Etape 4b — Creer la branche (AUTOMATIQUE)
-AVANT de coder quoi que ce soit, creer une branche depuis main :
-1. Proposer le nom : "Je cree la branche `feat/description-courte`, OK ?"
-2. `git checkout -b feat/description-courte`
-3. Travailler EXCLUSIVEMENT sur cette branche
-IMPORTANT: Ne JAMAIS coder une feature sur main.
-
-### Etape 5 — Detecter la complexite
-Apres validation du plan, evalue :
-- Plan > 3 etapes ou 4+ fichiers ou nouvelle page → feature complexe
-TOUJOURS demander confirmation avant d'implementer.
-
-### Etape 6 — Implementer
-Coder en suivant le plan valide. Utiliser les composants ui/ existants. Ecrire les tests.
-
-### Etape 7 — QA
-Lancer build, lint, tests. Si FAIL → corriger (max 3 boucles).
-
-### Etape 8 — Review Codex SYSTEMATIQUE
-```
-/codex:adversarial-review --base main
-```
-
-### Etape 9 — Verification visuelle
-Ouvrir l'app (Computer Use prioritaire, Playwright fallback). Screenshots.
-
-### Etape 10 — PR
-Creer la PR avec description claire + screenshots.
+Pour les corrections triviales (typo, config, texte) : commit direct sur la branche courante, pas besoin du pipeline.
 
 ## Regles critiques
 
@@ -280,9 +227,6 @@ IMPORTANT: Quand tu fais une erreur et que je te corrige, ajoute une regle dans 
 ## References
 @docs/vision-produit.md
 @docs/conventions-code.md
-@.claude/contexts/dev.md
-@.claude/contexts/review.md
-@.claude/contexts/research.md
 ```
 
 ### 4.3 — .claude/settings.json (hooks projet)
@@ -310,21 +254,16 @@ IMPORTANT: Quand tu fais une erreur et que je te corrige, ajoute une regle dans 
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if [ -f package.json ]; then npx tsc --noEmit 2>&1 | tail -5; fi; exit 0"
-          }
-        ]
-      }
     ]
   }
 }
 ```
+
+Hooks installes :
+- **PreToolUse Bash** — bloque `--no-verify` (skip git hooks interdit).
+- **PostToolUse Write/Edit** — auto-format les fichiers JS/TS apres edition.
+
+Pas de hook `Stop` : la verification typecheck/build se lance a la demande via le skill global `/verify`, pas a chaque fin de turn (trop bruyant).
 
 ### 4.4 — .claude/rules/
 Creer ces fichiers (adapter les paths selon la stack) :
@@ -451,58 +390,11 @@ Si un composant n'existe pas, cree-le d'abord dans src/components/ui/
 avec les tokens du DESIGN.md, PUIS utilise-le dans la page.
 ```
 
-### 4.5 — .claude/contexts/
-
-**dev.md**
-```markdown
-## Mode DEV
-Applique ces instructions UNIQUEMENT si le fichier .claude/current-mode.txt contient "dev".
-Si ce n'est pas ton mode actif, IGNORE cette section.
-
-Priorites en mode dev:
-1. Que ca marche
-2. Que ce soit correct
-3. Que ce soit propre
-
-Code d'abord, explique apres. Prefere les solutions fonctionnelles.
-Utilise les composants ui/ existants. Suis le plan valide.
-```
-
-**review.md**
-```markdown
-## Mode REVIEW
-Applique ces instructions UNIQUEMENT si le fichier .claude/current-mode.txt contient "review".
-Si ce n'est pas ton mode actif, IGNORE cette section.
-
-Revue rigoureuse:
-- Priorise par severite (CRITICAL > HIGH > MEDIUM > LOW)
-- Verifie la securite (permissions, inputs, secrets)
-- Verifie le design system (composants ui/ utilises, pas de redesign)
-- Groupe les findings par fichier
-- Ne rapporte que les issues dont tu es >80% sur
-```
-
-**research.md**
-```markdown
-## Mode RESEARCH
-Applique ces instructions UNIQUEMENT si le fichier .claude/current-mode.txt contient "research".
-Si ce n'est pas ton mode actif, IGNORE cette section.
-
-Exploration et comprehension avant action:
-1. Clarifier la question
-2. Investiguer (lire le code, la doc, les tests)
-3. Former une theorie
-4. Substantier avec des preuves
-5. Presenter les findings
-
-Ne PAS coder. Comprendre d'abord.
-```
-
-**.claude/current-mode.txt** : contenu `dev`
-
-### 4.6 — .claude/agents/
+### 4.5 — .claude/agents/
 
 Creer chaque agent dans `.claude/agents/[nom]/CLAUDE.md`. ADAPTER le contexte (stack, DB, outils) au projet.
+
+Set minimal : 4 agents essentiels. Les autres (build-fixer, code-reviewer, performance-optimizer, doc-updater, verify-app) se creent **a la demande** quand le besoin reel apparait, pas en prevention.
 
 **architect/CLAUDE.md**
 ```markdown
@@ -566,47 +458,6 @@ Tu es un reviewer UX/design senior.
 Tu ne codes PAS. Tu critiques et proposes.
 ```
 
-**build-fixer/CLAUDE.md**
-```markdown
----
-name: build-fixer
-description: Fix build errors with minimal changes.
-model: sonnet
-tools:
-  - Read
-  - Write
-  - Edit
-  - Bash
-  - Grep
-  - Glob
----
-Tu fixes les erreurs de build/typecheck avec des changements MINIMAUX.
-- UNE erreur a la fois, re-build apres chaque fix
-- STOP si le fix introduit plus d'erreurs
-- STOP apres 3 tentatives sur la meme erreur
-- STOP si changement d'architecture necessaire
-- N'ajoute PAS de features, ne refactore PAS
-```
-
-**code-reviewer/CLAUDE.md**
-```markdown
----
-name: code-reviewer
-description: Senior code reviewer. Use before PRs.
-model: sonnet
-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
----
-Tu es un reviewer de code senior. Tu n'as PAS ecrit ce code.
-- Ne rapporte QUE les issues dont tu es >80% sur
-- Classification: CRITICAL (block), HIGH (warn), MEDIUM (info), LOW (note)
-- Approuve si: zero CRITICAL, zero HIGH
-- Verifie: securite, qualite, patterns framework, performance
-```
-
 **security-auditor/CLAUDE.md**
 ```markdown
 ---
@@ -628,68 +479,7 @@ Check systematique:
 - Rate limiting manquant
 ```
 
-**verify-app/CLAUDE.md**
-```markdown
----
-name: verify-app
-description: Visual verification of the app. Use after features to verify UI/UX.
-model: opus
-tools:
-  - Read
-  - Bash
-  - Grep
-  - Glob
----
-Tu verifies visuellement que l'application fonctionne.
-1. Lance le serveur de dev
-2. Computer Use (prioritaire): ouvre l'app dans un vrai navigateur
-   - Verifie le rendu visuel, animations, transitions
-   - Teste le responsive (375px, 768px, 1440px)
-   - Clique tous les boutons, remplis tous les formulaires
-   - Teste les cas limites
-3. Playwright (fallback si Computer Use indisponible)
-4. Screenshots a chaque breakpoint
-5. Erreurs console, Core Web Vitals
-Rapport: routes testees, screenshots, erreurs, verdict global.
-```
-
-**performance-optimizer/CLAUDE.md**
-```markdown
----
-name: performance-optimizer
-description: Performance audit specialist.
-model: sonnet
-tools:
-  - Read
-  - Grep
-  - Glob
-  - Bash
----
-Audit perf:
-- FCP < 1.8s, LCP < 2.5s, CLS < 0.1, TBT < 200ms
-- Bundle < 200KB gzip
-- Re-renders inutiles, N+1 queries, imports lourds
-```
-
-**doc-updater/CLAUDE.md**
-```markdown
----
-name: doc-updater
-description: Documentation updater. Use after structural PRs.
-model: haiku
-tools:
-  - Read
-  - Write
-  - Edit
-  - Glob
----
-Mets a jour la documentation du projet.
-- docs/architecture.md (diagrammes Mermaid)
-- README du module concerne
-- Garder les docs coherentes avec le code actuel
-```
-
-### 4.7 — .claude/skills/
+### 4.6 — .claude/skills/
 
 **verify/SKILL.md**
 ```markdown
@@ -757,36 +547,7 @@ Pour une PR specifique: "rollback la PR du paiement" → cherche dans l'historiq
 Si le revert a des conflits, les resoudre ou escalader a Vincent.
 ```
 
-**feature/SKILL.md**
-```markdown
----
-name: feature
-description: Launch the full harness pipeline for complex features. Auto-detected by Claude, not manually invoked.
----
-# Harness pipeline
-
-Ce skill est lance AUTOMATIQUEMENT par Claude quand il detecte une feature complexe.
-Vincent ne le tape jamais manuellement.
-
-## Criteres de declenchement
-- Le plan depasse 3 etapes
-- Ca touche 4+ fichiers
-- Ca cree une nouvelle page/route
-- Ca touche auth, paiement, mode OPEN, ou donnees sensibles
-
-## Pipeline
-1. ARCHITECT (Opus) → plan.md + contrat-qualite.md
-2. /codex:adversarial-review du plan → feedback integre
-3. Vincent valide le plan
-4. REVIEWER (Opus) si UI detecte → propositions design
-5. DEVELOPER (Opus) dans un git worktree isole → implemente
-6. QA (Opus) → typecheck + lint + tests + build + review
-7. Si FAIL → CODEX diagnostique → DEVELOPER corrige → retour QA
-8. VERIFY-APP (Opus) → Computer Use + screenshots
-9. Si problemes visuels → DEVELOPER corrige
-10. SECURITY-AUDITOR (Sonnet) si code sensible (OPEN, auth, paiement)
-11. PR creee automatiquement
-```
+Pas de skill `feature/` local : il existe deja en global (`~/.claude/skills/feature/`) installe par claude-preset. Aucune duplication.
 
 **verify-app/SKILL.md**
 ```markdown
@@ -814,7 +575,7 @@ description: Visual verification of the running app.
 - Verdict global
 ```
 
-### 4.8 — DESIGN.md
+### 4.7 — DESIGN.md
 ```markdown
 # Design System — [Nom du projet]
 
@@ -843,7 +604,7 @@ description: Visual verification of the running app.
 <!-- Ajouts libres -->
 ```
 
-### 4.9 — docs/
+### 4.8 — docs/
 - **docs/vision-produit.md** — le contenu valide en Phase 3
 - **docs/conventions-code.md** — genere a partir de la stack choisie (meme format que ProjectReview)
 - **docs/architecture.md** — template Mermaid vide :
@@ -853,7 +614,7 @@ description: Visual verification of the running app.
 ```
 - **docs/roadmap.md** — le roadmap valide en Phase 3
 
-### 4.10 — Fichiers racine
+### 4.9 — Fichiers racine
 - **.editorconfig** adapte a la stack
 - **.gitignore** adapte a la stack (genere avec les bons patterns)
 
@@ -895,11 +656,10 @@ Fichiers crees : [nombre]
 
 Structure installee :
   .claude/rules/     [X] fichiers
-  .claude/agents/    [X] agents
-  .claude/skills/    [X] skills
-  .claude/contexts/  3 modes (dev, review, research)
+  .claude/agents/    4 agents (architect, qa, reviewer, security-auditor)
+  .claude/skills/    4 skills (verify, build-fix, rollback, verify-app)
   docs/              vision, conventions, architecture, roadmap
-  CLAUDE.md          workflow feature complet
+  CLAUDE.md          contexte projet (le workflow feature vit dans /feature global)
   DESIGN.md          template design tokens
 
 GitHub :        [URL si cree / "local uniquement"]
