@@ -1,142 +1,80 @@
 ---
 name: vincent-context
-description: Regles transverses Vincent appliquees a tous ses projets code (Bridge, ClubHouse, AppDiag, CV Virtuel, Funnel, csp-back). Inclut le workflow feature en 10 etapes obligatoire, les regles design system (utiliser composants ui/), l'interdiction des em dashes, la discipline tests, le pattern Things That Will Bite You, le workflow Git/Codex. A invoquer automatiquement sur tout projet contenant package.json ou un framework Next.js/React/React Native.
+description: Regles transverses Vincent appliquees a tous ses projets code (Bridge, ClubHouse, AppDiag, CV Virtuel, Funnel, csp-back, PennyLane). Inclut workflow feature 10 etapes obligatoire, design system, em dashes interdits, tests obligatoires, pattern Things That Will Bite You, workflow Git/Codex. A invoquer automatiquement sur tout projet avec package.json (Next, React, RN, SvelteKit, Node).
 ---
 
-# Vincent Context — Regles transverses pour tous projets code
+# Vincent Context — Regles transverses
 
-Ce skill consolide les regles que Vincent applique sur tous ses projets code. **Si tu lis ce skill, respecte ces regles meme si elles ne sont pas repetees dans le CLAUDE.md du projet.**
+Si tu lis ce skill, **respecte ces regles meme si elles ne sont pas dans le CLAUDE.md projet**.
 
 ## Workflow feature OBLIGATOIRE
 
-Quand Vincent demande une nouvelle feature ou modification significative, suis ce flow dans l'ordre. **Ne saute aucune etape.**
+Quand Vincent demande une feature ou modification significative, suis dans l'ordre :
 
-### Etape 1 — Comprendre (QUESTIONS)
-- Quel est l'objectif metier ? Pourquoi cette feature ?
-- Qui va l'utiliser ? Quel parcours utilisateur ?
-- Y a-t-il des contraintes specifiques ?
-- Si quelque chose est flou, DEMANDE. Ne devine pas.
+1. **Comprendre** — Pose des questions metier/UX/contraintes. Si flou, DEMANDE, ne devine pas.
+2. **Rechercher** — Cherche si une solution existe (codebase, GitHub, npm, doc lib). Ne reinvente pas.
+3. **Planifier** (Plan mode) — Fichiers, composants reutilises, tables/API, criteres succes.
+4. **Challenge Codex OBLIGATOIRE** : `/codex:rescue Analyse ce plan : faisabilite, risques, alternatives plus simples`. Presente plan + feedback + ajustements.
+5. **Branche auto** : `feat/xxx` (jamais sur main). Proposer le nom avant.
+6. **Detecter complexite** : > 3 etapes / 4+ fichiers / nouvelle page = complexe → demander confirmation.
+7. **Implementer** : composants ui/ existants, tests pour la logique metier.
+8. **QA** : build + lint + typecheck + tests. Max 3 boucles de fix.
+9. **Codex review SYSTEMATIQUE** : `/codex:adversarial-review --base main`. Compteur separe de Claude, utilise-le sans crainte.
+10. **Verif visuelle** : Computer Use prio, Playwright fallback. Screenshots.
+11. **PR** : description claire + screenshots.
 
-### Etape 2 — Rechercher (RESEARCH-FIRST)
-Avant de coder, cherche si une solution existe :
-- Dans le codebase (composant similaire ? helper reutilisable ?)
-- Sur GitHub, npm, doc officielle de la lib
-- Ne reinvente pas la roue.
+## Design system
 
-### Etape 3 — Planifier (PLAN MODE)
-Presente un plan structure AVANT de coder :
-- Fichiers a creer/modifier
-- Composants existants a reutiliser
-- Tables/API concernees
-- Criteres de succes verifiables
+- Utilise TOUJOURS `src/components/ui/`. Ne redesigne JAMAIS un composant existant.
+- Si un composant manque, crees-le dans ui/ d'abord, puis utilise-le.
+- DESIGN.md du projet prime sur les suggestions.
+- **ClubHouse specifique** : Pencil pour le design (Vincent), Claude integre uniquement.
 
-### Etape 4 — Challenge du plan (CODEX) — OBLIGATOIRE
-**YOU MUST envoyer le plan a Codex AVANT de demander validation a Vincent.**
+## Texte produit
 
-```
-/codex:rescue Analyse ce plan et challenge-le : faisabilite, risques, alternatives plus simples.
-```
+- **Pas d'em dashes (—)** dans le texte visible (UI, posts, descriptions, placeholders, emails). Virgule, point ou parentheses.
+- Pas d'emojis ni d'icones glyphs (check, croix, warning) dans les reponses chat — Vincent les deteste comme "AI tell" amateur.
+- Phrases courtes, directes. Pas de "il est important de", "il convient de noter", "tantot... tantot...".
 
-Presente a Vincent : le plan original + feedback Codex + ajustements faits.
+## Tests
 
-### Etape 4b — Creer la branche (AUTOMATIQUE)
-AVANT de coder, creer une branche depuis main :
-1. Proposer le nom : "Je cree `feat/description-courte`, OK ?"
-2. `git checkout -b feat/description-courte`
-3. Travailler EXCLUSIVEMENT sur cette branche.
+- Toute logique metier DOIT avoir des tests.
+- Jamais marquer une tache terminee sans tests passants.
+- TDD encourage : test qui reproduit le bug, puis le faire passer.
+- Ne JAMAIS faire passer un test en cassant le vrai usage.
 
-**Ne JAMAIS coder une feature sur main.**
+## Things That Will Bite You — meta-regle
 
-### Etape 5 — Detecter la complexite
-Si plan > 3 etapes ou 4+ fichiers ou nouvelle page → feature complexe. Demander confirmation avant implementation.
-
-### Etape 6 — Implementer
-Code en suivant le plan valide. Utilise les composants ui/ existants. Ecris les tests.
-
-### Etape 7 — QA
-Lance build, lint, typecheck, tests. Si fail → corrige (max 3 boucles avant remontee a Vincent).
-
-### Etape 8 — Review Codex SYSTEMATIQUE
-```
-/codex:adversarial-review --base main
-```
-Le compteur Codex est separe de Claude — utilise-le sans crainte de manger ton quota.
-
-### Etape 9 — Verification visuelle
-Ouvre l'app (Computer Use prioritaire, Playwright fallback). Screenshots.
-
-### Etape 10 — PR
-Cree la PR avec description claire + screenshots.
-
-## Regles design system
-
-- **Utilise TOUJOURS les composants de src/components/ui/.** Ne redesigne JAMAIS un composant existant.
-- Si un composant manque, cree-le dans ui/ d'abord puis utilise-le.
-- Respecte les tokens du DESIGN.md du projet si present.
-- **Pour ClubHouse specifiquement** : Pencil pour le design (Vincent), Claude pour l'integration. Claude ne designe PAS l'UI.
-
-## Regles texte produit
-
-- **Pas d'em dashes (—) dans le texte visible** (UI, posts, descriptions, placeholders, emails). Utiliser virgule, point, parentheses.
-- Les em dashes sont un signal artificiel "IA" que Vincent deteste.
-- Idem : pas de "Tantot... tantot...", pas de "C'est non seulement... mais aussi...". Phrases courtes, directes.
-- Pas de "il est important de", "il convient de noter", "il est a noter que".
-
-## Discipline tests
-
-- **Toute logique metier DOIT avoir des tests.**
-- Ne JAMAIS marquer une tache comme terminee sans tests qui passent.
-- TDD encourage : ecrire le test qui reproduit le bug, puis le faire passer.
-- Ne JAMAIS faire passer un test en cassant le vrai usage. Le test doit refleter le besoin reel.
-
-## Pattern "Things That Will Bite You" — meta-regle
-
-Quand Vincent te corrige sur une erreur :
+Quand Vincent corrige une erreur :
 1. Identifie la regle qui aurait empeche l'erreur.
-2. Ajoute-la dans la section `## Things That Will Bite You` du CLAUDE.md projet.
-3. Format : `**[Topic]** : description courte + exemple concret + raison.`
+2. Ajoute-la dans `## Things That Will Bite You` du CLAUDE.md projet.
+3. Format : `**[Topic]** : description + exemple + raison.`
 
-Cette section est ta memoire long-terme des pieges specifiques au projet. Plus elle grandit, moins Claude refait les memes erreurs.
+Limite : 10 entrees max par projet. Si plus, demander a Vincent de prioriser/archiver.
 
-**Limite** : si la section depasse 10 entrees, demander a Vincent de prioriser/archiver. Sinon ca dilue le contexte.
+## Git
 
-## Workflow Git
+- Branches : `feat/`, `fix/`, `refactor/`, `chore/`, `docs/`. **Jamais sur main**.
+- Conventional commits en anglais (`feat: add login`).
+- PR : description + screenshots si UI + tests mentionnes.
+- **Jamais `--no-verify`** (bloque par hook).
 
-- Branches : `feat/`, `fix/`, `refactor/`, `chore/`, `docs/`. Jamais sur main.
-- Commits : conventional commits en anglais (`feat: add login flow`).
-- PR : description claire, screenshots si UI, mention des tests ajoutes.
-- **Jamais `--no-verify`** — bloque par hook PreToolUse.
+## Long-running tasks — `/goal`
 
-## Mode plan vs implementation
+Pour les taches > 5 min ou multi-etapes verifiables :
+1. Critere verifiable : `/goal all tests in tests/auth pass and lint is clean`
+2. Auto Mode (`shift+tab`) pour skip permissions
+3. Push notif quand done ou besoin d'input
 
-**Pour toute feature non triviale, commencer en Plan mode.** Ne jamais implementer sans plan valide.
+Pas pour "make it better" ambigu — definir le critere d'abord.
 
-## Long-running tasks — Quand utiliser /goal
+## Interdits (synthese)
 
-Pour les taches qui prennent plus de 5 minutes ou qui ont plusieurs etapes verifiables :
-
-1. Exprime l'objectif comme critere verifiable :
-   `/goal all tests in tests/auth pass and lint is clean`
-2. Combine avec Auto Mode (`shift+tab`) pour skip les permission prompts
-3. Push notif mobile quand atteint ou besoin d'input
-
-**A NE PAS utiliser** pour "make it better" ou taches ambigues — definir le critere d'abord.
-
-## Comportements interdits (synthese)
-
-- Ajouter des features non demandees (Karpathy rule 2).
-- Refactor du code adjacent qui marche (Karpathy rule 3).
-- Supprimer du dead code sans permission (Karpathy rule 3).
-- Faire passer un test en cassant le vrai usage.
-- Skipper les hooks (--no-verify).
-- Push directement sur main.
-- Faire un commit sans message clair.
-- Utiliser des em dashes dans le texte produit.
-- Redesigner un composant ui/ existant.
-
-## Workflow journalier optimise (rappel)
-
-1. **Matin** : `/goal Process bookmarks veille du jour` + Auto Mode + push notif
-2. **Apres feature** : `/codex:rescue` plan + branche auto + implementation + `/codex:adversarial-review`
-3. **Hands-off** : combo `/goal` + `/remote-control` + push notif mobile
-4. **Recurrents** : `/schedule "every X" task` pour les jobs reguliers
+- Ajouter features non demandees (Karpathy 2)
+- Refactor adjacent qui marche (Karpathy 3)
+- Supprimer dead code sans permission (Karpathy 3)
+- Faire passer un test en cassant le vrai usage
+- Skipper hooks (`--no-verify`)
+- Push direct sur main
+- Em dashes dans texte produit
+- Redesigner composant ui/ existant

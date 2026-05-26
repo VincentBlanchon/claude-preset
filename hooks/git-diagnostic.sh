@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# Hook SessionStart : diagnostic git pour projets multi-machine + detection projet vierge
-# A placer dans ~/.claude/hooks/git-diagnostic.sh et ~/Developer/claude-preset/hooks/git-diagnostic.sh
-# Source : docs/consultant-claude-code-mai-2026.md section 3.4
+# SessionStart hook : diagnostic git LOCAL pour projets multi-machine
+# Pas de git fetch (reseau lent, 1-20s). Utilise juste le cache local.
+# Pour fresh fetch, Vincent fait git pull/fetch manuellement.
 
-set -e
-
-# Detection projet vierge (compatible avec le hook actuel de Vincent)
+# Detection projet vierge
 if [ ! -f CLAUDE.md ] && [ ! -d .git ]; then
   echo "[PROJET VIERGE] Tape /init-project pour initialiser"
   exit 0
@@ -16,56 +14,32 @@ if [ ! -d .git ]; then
   exit 0
 fi
 
-# Recupere le path courant
 cwd=$(pwd)
 
-# Liste des projets multi-machine (a etendre selon besoin)
-multi_machine_projects=(
-  "/Users/vincentblanchon/Developer/Carriere"
-  "/Users/vincentblanchon/Developer/veille-tech"
-  "/Users/vincentblanchon/Developer/claude-preset"
-  "/Users/vincentblanchon/Developer/Perso/Carrière"
-  "/Users/vincentblanchon/Developer/Perso/Vie"
-)
+# Liste des projets multi-machine
+case "$cwd" in
+  /Users/vincentblanchon/Developer/Carriere*|\
+  /Users/vincentblanchon/Developer/veille-tech*|\
+  /Users/vincentblanchon/Developer/claude-preset*|\
+  /Users/vincentblanchon/Developer/Perso/Carrière*|\
+  /Users/vincentblanchon/Developer/Perso/Vie*)
+    ;;
+  *)
+    exit 0
+    ;;
+esac
 
-# Verifie si on est dans un projet multi-machine
-is_multi=false
-for proj in "${multi_machine_projects[@]}"; do
-  if [[ "$cwd" == "$proj"* ]]; then
-    is_multi=true
-    break
-  fi
-done
-
-if [ "$is_multi" = "false" ]; then
-  exit 0
-fi
-
-# Diagnostic affiche dans la session Claude
-echo "[Multi-machine project: $(basename "$cwd")]"
-
-# Fetch silencieux (ne plante pas si offline)
-git fetch --quiet 2>/dev/null || {
-  echo "  WARN: git fetch failed (offline?)"
-  exit 0
-}
-
-# Status (gere absence d'upstream)
+# Diagnostic LOCAL only (pas de fetch reseau, instantane)
 ahead=$(git rev-list --count @{u}..HEAD 2>/dev/null || echo "0")
 behind=$(git rev-list --count HEAD..@{u} 2>/dev/null || echo "0")
-dirty=$(git status --porcelain | wc -l | tr -d ' ')
+dirty=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
 
-if [ "$behind" -gt 0 ]; then
-  echo "  WARN: $behind commit(s) behind origin. Run: git pull"
-fi
-if [ "$ahead" -gt 0 ]; then
-  echo "  INFO: $ahead commit(s) ahead of origin (unpushed)"
-fi
-if [ "$dirty" -gt 0 ]; then
-  echo "  INFO: $dirty uncommitted change(s)"
-fi
-if [ "$behind" -eq 0 ] && [ "$ahead" -eq 0 ] && [ "$dirty" -eq 0 ]; then
-  echo "  OK: synced with origin, clean"
+# N'affiche que si quelque chose merite l'attention (sinon silencieux)
+if [ "$behind" -gt 0 ] || [ "$dirty" -gt 5 ]; then
+  echo "[$(basename "$cwd")]"
+  [ "$behind" -gt 0 ] && echo "  $behind commit(s) behind. git pull avant de travailler."
+  [ "$ahead" -gt 0 ] && echo "  $ahead commit(s) ahead (unpushed)."
+  [ "$dirty" -gt 5 ] && echo "  $dirty uncommitted change(s)."
 fi
 
 exit 0
