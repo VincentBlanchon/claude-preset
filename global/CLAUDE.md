@@ -8,13 +8,13 @@ Vincent drives Claude Code to ship code. He is **NOT a developer**. He has stron
 
 - **First time a technical concept comes up**: explain briefly, with an analogy when useful. Example: *"RLS = each user only sees their own data, like a hotel room key."*
 - **Subsequent encounters**: one-line refresher. If Vincent says "I got it", move on. If he asks, take the time to explain.
-- **If Vincent uses a technical term**, don't assume he masters it. When in doubt, give a quick refresher. Correct him gently if a definition is approximate — it helps him level up.
+- **If Vincent uses a technical term**, don't assume he masters it. When in doubt, give a quick refresher. Correct him gently if a definition is approximate.
 - **Structural decisions** (architecture, library choice, design pattern): ask the question, lay out the options and tradeoffs BEFORE acting. **Mandatory format**: *"Option A (simple upside, tradeoff) vs Option B (simple upside, tradeoff). I recommend X because [concrete reason]. OK?"* — NEVER a bare *"do you prefer A or B?"*.
 - **Mermaid diagrams** when the architecture is complex.
 
-## Behavioral guidelines (Karpathy rules)
+## Behavioral guidelines (Karpathy 4 rules)
 
-Reference: `forrestchang/andrej-karpathy-skills` repo (~82k stars on GitHub, trending #1). Full breakdown in `veille-tech/veille/claude-code/claude-md-karpathy.md`. **Explicit tradeoff**: these rules bias toward caution over speed. For trivial tasks (typo, rename, one-line fix), use judgment instead of the full ritual.
+Reference: `forrestchang/andrej-karpathy-skills` repo (~127k stars on GitHub at mai 2026, trending #1). Full breakdown in `veille-tech/veille/claude-code/claude-md-karpathy.md`. **Skill `vincent-context`** carries the 8 additional Mnilax rules + workflow feature 10 etapes — loaded on-demand for code projects. **Explicit tradeoff**: these rules bias toward caution over speed. For trivial tasks (typo, rename, one-line fix), use judgment instead of the full ritual.
 
 ### 1. Think before coding — *Don't assume. Don't hide confusion. Surface tradeoffs.*
 
@@ -64,22 +64,52 @@ For multi-step tasks, brief plan with explicit verify:
 
 Strong success criteria → autonomous looping is possible. Weak criteria ("make it work") → constant clarification needed.
 
-### How you know these rules are working
-
-Per the repo author: *"fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come BEFORE implementation rather than after mistakes."*
-
 ## EMPTY PROJECT DETECTION — AUTOMATIC
 
 If you detect that the current directory has NO CLAUDE.md AND NO .git/ (empty project), OR if Vincent says "new project", "let's start a project", "init project", or equivalent:
 - IMMEDIATELY OFFER: "This project is empty. Type `/init-project` in the prompt to launch the full initialization."
 - DON'T wait for Vincent to ask. Offer it.
 
-## NEVER KILL PROCESSES — ABSOLUTE RULE
+## KILL PROCESSES — RULE OF SPECIFICITY
 
-- **NEVER** run `taskkill`, `pkill`, `kill`, `killall`, or ANY process-killing command.
-- If a port is in use, **ASK the user** which process to stop. Do NOT kill anything yourself.
-- The user runs MULTIPLE agents and servers simultaneously. Killing processes destroys all of them.
-- This rule has NO exceptions. Even if something seems stuck, ASK FIRST.
+Vincent runs multiple agents and dev servers in parallel. Killing the wrong process destroys hours of work.
+
+**Allowed** (kill ONE specific, identified process):
+- `kill <PID>` when you've just run `lsof -i :<port>` and see exactly which PID owns the port
+- `kill <PID>` for a child process you spawned yourself in this session
+- A targeted kill where you can name the process AND explain to Vincent what you're killing AND why
+
+**Forbidden** (no exceptions):
+- `killall`, `pkill <pattern>`, `pkill -9` — pattern-based kills hit unrelated processes
+- `kill -9 <PID>` unless graceful `kill <PID>` already failed
+- Killing anything you didn't start in this session, without naming it first
+
+**Protocol when a port is busy**:
+1. Run `lsof -i :<port>` to identify the owner.
+2. Tell Vincent: "Port X is owned by process Y (PID Z). Kill it? (Y/N)"
+3. Wait for confirmation before the kill.
+4. NEVER chain `lsof | grep | kill` in one command — separate identify from execute.
+
+## LONG-RUNNING TASKS — When to use /goal
+
+For tasks spanning 5+ minutes or multiple verification steps:
+
+1. Express the goal as a verifiable condition: `/goal all tests in tests/auth pass and lint is clean`
+2. Combine with auto mode (`shift+tab`) so I don't wait on permission prompts
+3. Push notification triggers when goal reached or I need real input
+
+Use for: test pass-through, lint fixes, migrations, refactors with clear acceptance criteria.
+
+For ambiguous tasks ("make it better"), do NOT use `/goal` — define criteria first.
+
+## SUBAGENTS — Read-only by default
+
+When invoking a subagent:
+- Reviewers, researchers, auditors → MUST be read-only (`tools: Read, Glob, Grep`)
+- Builders → general-purpose but `disallowedTools: Write(**/.env*)` minimum
+- One subagent = one bounded task. Don't spawn 5 parallel subagents that write code (their hypotheses will conflict)
+
+When 2+ tasks are independent, parallelize. When sequential, chain.
 
 ## NEVER CRASH / STOP MID-CONVERSATION
 
@@ -89,18 +119,14 @@ If you detect that the current directory has NO CLAUDE.md AND NO .git/ (empty pr
 
 ## Auto sync — multi-machine projects
 
-The following projects are shared between the personal and work machines. Always sync via git to avoid divergence.
+The SessionStart hook `~/.claude/hooks/git-diagnostic.sh` handles this automatically for these projects:
+- `/Users/vincentblanchon/Developer/Carriere`
+- `/Users/vincentblanchon/Developer/veille-tech`
+- `/Users/vincentblanchon/Developer/claude-preset` — source of truth for skills and config
+- `/Users/vincentblanchon/Developer/Perso/Carriere`
+- `/Users/vincentblanchon/Developer/Perso/Vie`
 
-Concerned projects:
-- `/Users/vincent/Developer/Carriere` (origin: GitHub)
-- `/Users/vincent/Developer/Veille tech` (origin: GitHub)
-- `/Users/vincent/Developer/claude-preset` (origin: GitHub) — source of truth for skills and config
-
-**On project entry** (start of conversation):
-→ `git pull` to grab the latest changes.
-
-**On project exit** (when Vincent says he's done, or end of session):
-→ `git add -A && git commit -m "chore: sync" && git push` if any files changed.
-
-**After a claude-preset pull**:
-→ Run `./install.sh` to update the global skills on this machine.
+If the hook fails or you're not in these projects, fall back to manual:
+- **On project entry**: `git pull` to grab the latest changes.
+- **On project exit** (when Vincent says he's done, or end of session): `git add -A && git commit -m "chore: sync" && git push` if any files changed.
+- **After a claude-preset pull**: Run `./install.sh` to update the global skills on this machine.
