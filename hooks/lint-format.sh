@@ -28,28 +28,43 @@ if [ ! -f "$file_path" ]; then
   exit 0
 fi
 
+# Cherche le formatter dans les node_modules locaux puis tombe sur npx global
+format_file() {
+  local file="$1"
+  # Trouver le repo root (le premier package.json en remontant)
+  local dir
+  dir=$(dirname "$file")
+  while [ "$dir" != "/" ] && [ ! -f "$dir/package.json" ]; do
+    dir=$(dirname "$dir")
+  done
+
+  # 1) biome local
+  if [ -x "$dir/node_modules/.bin/biome" ]; then
+    "$dir/node_modules/.bin/biome" format --write "$file" >/dev/null 2>&1 && return 0
+  fi
+  # 2) prettier local
+  if [ -x "$dir/node_modules/.bin/prettier" ]; then
+    "$dir/node_modules/.bin/prettier" --write "$file" >/dev/null 2>&1 && return 0
+  fi
+  # 3) Fallback npx
+  if command -v npx >/dev/null 2>&1; then
+    (cd "$dir" && npx biome format --write "$file" >/dev/null 2>&1) && return 0
+    (cd "$dir" && npx prettier --write "$file" >/dev/null 2>&1) && return 0
+  fi
+  return 1
+}
+
 case "$file_path" in
   *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.json|*.jsonc)
-    # On essaie biome d'abord
-    if command -v npx >/dev/null 2>&1; then
-      if npx --no-install biome format --write "$file_path" >/dev/null 2>&1; then
-        exit 0
-      elif npx --no-install prettier --write "$file_path" >/dev/null 2>&1; then
-        exit 0
-      else
-        # Si les deux echouent, signaler a Claude (non-blocking, exit 1)
-        echo "[lint-format hook] Format failed for $file_path. Neither biome nor prettier available or both errored." >&2
-        exit 1
-      fi
-    else
-      # npx absent, skip
+    if format_file "$file_path"; then
       exit 0
+    else
+      echo "[lint-format hook] Format failed for $file_path. Aucun biome/prettier accessible." >&2
+      exit 1
     fi
     ;;
   *.css|*.scss)
-    if command -v npx >/dev/null 2>&1; then
-      npx --no-install prettier --write "$file_path" >/dev/null 2>&1 || true
-    fi
+    format_file "$file_path" || true
     exit 0
     ;;
   *)
