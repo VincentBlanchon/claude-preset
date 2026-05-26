@@ -1,0 +1,38 @@
+{
+  "_comment": "Template settings.json projet — utilise les hooks centralises de ~/Developer/claude-preset/hooks/. Source : claude-preset/docs/setup-v2-recap.md.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${HOME}/Developer/claude-preset/hooks/block-no-verify.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${HOME}/Developer/claude-preset/hooks/lint-format.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${HOME}/Developer/claude-preset/hooks/typecheck-on-stop.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

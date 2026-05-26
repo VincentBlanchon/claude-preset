@@ -158,13 +158,27 @@ UNE FOIS les Phases 1-3 validees, installe tout. Adapte chaque fichier au projet
 git init
 ```
 
-### 4.2 — CLAUDE.md projet (< 200 lignes)
-Le CLAUDE.md projet contient **uniquement** ce qui est specifique au projet (stack, workflow, regles metier). Le profil de Vincent + les behavioral guidelines (Karpathy) sont DEJA dans le global `~/.claude/CLAUDE.md` et lus pour tous les projets — ne PAS les dupliquer ici.
+### 4.2 — CLAUDE.md projet (< 100 lignes idealement, < 200 max)
 
-Modele base sur Bridge/ClubHouse :
+Le CLAUDE.md projet contient **uniquement** ce qui est specifique au projet (stack, commands, regles metier specifiques, things-that-will-bite-you).
+
+NE PAS dupliquer ici :
+- Le profil Vincent + Karpathy 4 → deja dans `~/.claude/CLAUDE.md` (global, charge pour tous projets)
+- Workflow feature 10 etapes + regles design system + em dashes + tests + meta TTWBY → deja dans le skill global `vincent-context` (auto-charge sur projets code)
+- Codex challenge plan + adversarial review → deja dans vincent-context
+
+Plafond Mnilax (200 lignes / 14 regles) : au-dela, l'adherence Claude chute de 76% a 52%. Cible : sub-100 lignes.
+
+Utiliser directement le template `~/Developer/claude-preset/templates/claude-md-projet.md` qui implemente ce slim format.
+
+Modele inline (issu de Bridge / ClubHouse / AppDiag / CV Virtuel post-refactor setup v2) :
 
 ```markdown
-# [Nom du projet]
+# [Nom du projet] — [tagline]
+
+> **Profil Vincent + Karpathy 4** : `~/.claude/CLAUDE.md` (global).
+> **Workflow feature 10 etapes + regles design system + em dashes + tests + meta TTWBY** : skill `vincent-context` (auto-charge).
+> Ce fichier projet contient uniquement le contexte specifique a [projet].
 
 ## Commandes
 - `[pkg] dev` — dev server
@@ -204,22 +218,23 @@ IMPORTANT: Quand Vincent demande de creer ou modifier une page, modale, dashboar
 
 ## Workflow feature
 
-Pour toute feature non triviale, Claude lance AUTOMATIQUEMENT le skill global `/feature` qui orchestre :
-architect → plan → Codex challenge → branche → implementation → QA → review Codex → verification visuelle → PR.
+Le workflow feature 10 etapes (questions, research, plan, Codex challenge, branche auto, complexite, implementation, QA, Codex review, verification visuelle, PR) vit dans le skill global `vincent-context` qui se charge AUTOMATIQUEMENT sur tout projet code (trigger : presence de package.json + framework Next/React/RN).
 
-Tu n'as rien a taper — Claude detecte la complexite (plan > 3 etapes, 4+ fichiers, nouvelle page, code sensible touchant auth/paiement/donnees) et lance le pipeline.
+Vincent n'a rien a taper — Claude detecte la complexite et lance le pipeline.
 
 Pour les corrections triviales (typo, config, texte) : commit direct sur la branche courante, pas besoin du pipeline.
 
-## Regles critiques
+## Regles critiques specifiques [PROJET]
 
-IMPORTANT: Utilise TOUJOURS les composants de src/components/ui/. Ne redesigne JAMAIS un composant existant.
+<!-- Section a remplir avec UNIQUEMENT les regles specifiques a ce projet.
+     Les regles transverses (composants ui/, em dashes, tests obligatoires,
+     branche auto, meta TTWBY) sont deja dans le skill global vincent-context. -->
 
-IMPORTANT: Pour toute feature non triviale, commencer en Plan mode. Ne jamais implementer sans plan valide.
-
-IMPORTANT: Toute logique metier DOIT avoir des tests. Ne jamais marquer une tache comme terminee sans tests.
-
-IMPORTANT: Quand tu fais une erreur et que je te corrige, ajoute une regle dans "Things That Will Bite You" pour ne pas la refaire.
+Exemples de regles specifiques projet (selon le contexte) :
+- "Pas d'eparpillement de previews Vercel" (Bridge)
+- "csp-back est OFF-LIMITS" (ClubHouse)
+- "Lighthouse >= 85 mobile" (CV Virtuel)
+- "RLS = read role depuis user_roles table, pas JWT" (Bridge)
 
 ## Things That Will Bite You
 [vide — se remplit au fil du temps]
@@ -230,40 +245,45 @@ IMPORTANT: Quand tu fais une erreur et que je te corrige, ajoute une regle dans 
 ```
 
 ### 4.3 — .claude/settings.json (hooks projet)
+
+Utiliser le template `~/Developer/claude-preset/templates/settings-projet.json` qui reference les hooks centralises de `~/Developer/claude-preset/hooks/` :
+
+```bash
+cp ~/Developer/claude-preset/templates/settings-projet.json .claude/settings.json
+```
+
+Contenu (hooks centralises pour eviter la duplication entre projets) :
 ```json
 {
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo \"$TOOL_INPUT\" | grep -q -- '--no-verify' && echo 'BLOCKED: --no-verify is not allowed' >&2 && exit 2 || exit 0"
-          }
-        ]
+        "hooks": [{ "type": "command", "command": "bash ${HOME}/Developer/claude-preset/hooks/block-no-verify.sh" }]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "file=\"$TOOL_INPUT\"; if echo \"$file\" | grep -qE '\\.(ts|tsx|js|jsx)$'; then npx biome format --write \"$file\" 2>/dev/null || npx prettier --write \"$file\" 2>/dev/null; fi; exit 0"
-          }
-        ]
+        "hooks": [{ "type": "command", "command": "bash ${HOME}/Developer/claude-preset/hooks/lint-format.sh" }]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [{ "type": "command", "command": "bash ${HOME}/Developer/claude-preset/hooks/typecheck-on-stop.sh" }]
       }
     ]
   }
 }
 ```
 
-Hooks installes :
-- **PreToolUse Bash** — bloque `--no-verify` (skip git hooks interdit).
-- **PostToolUse Write/Edit** — auto-format les fichiers JS/TS apres edition.
+Hooks centralises actives :
+- **`block-no-verify.sh`** (PreToolUse Bash) — bloque `--no-verify` via `jq` correctement (exit 2 + reason).
+- **`lint-format.sh`** (PostToolUse Write/Edit) — auto-format avec biome local puis prettier local en fallback. Recupere le path via `jq -r '.tool_input.file_path'` (PAS via `$TOOL_INPUT` qui est un JSON, classique bug 2025 dans la communaute).
+- **`typecheck-on-stop.sh`** (Stop) — `tsc --noEmit` si `package.json` present. Exit 2 si erreurs TS, ce qui FORCE Claude a fixer au lieu de declarer victoire (vs `exit 0` swallow classique).
 
-Pas de hook `Stop` : la verification typecheck/build se lance a la demande via le skill global `/verify`, pas a chaque fin de turn (trop bruyant).
+Pourquoi centraliser dans claude-preset/hooks/ : 1 source de verite, 1 update propage a tous les projets via `claude-preset` git pull. Les anciens projets avec hooks inline dans `.claude/settings.json` ont un bug `$TOOL_INPUT` (probable que biome ne formate jamais).
 
 ### 4.4 — .claude/rules/
 Creer ces fichiers (adapter les paths selon la stack) :
@@ -392,7 +412,9 @@ avec les tokens du DESIGN.md, PUIS utilise-le dans la page.
 
 ### 4.5 — .claude/agents/
 
-Creer chaque agent dans `.claude/agents/[nom]/CLAUDE.md`. ADAPTER le contexte (stack, DB, outils) au projet.
+**FORMAT OFFICIEL MAI 2026 : fichiers plats `.claude/agents/[nom].md`** (PAS `.claude/agents/[nom]/CLAUDE.md` qui est l'ancien format non-standard). Utiliser le template `~/Developer/claude-preset/templates/agent-template.md`.
+
+ADAPTER le contexte (stack, DB, outils) au projet via les placeholders `{{STACK}}`, `{{PROJECT_NAME}}`, etc.
 
 Set minimal : 4 agents essentiels. Les autres (build-fixer, code-reviewer, performance-optimizer, doc-updater, verify-app) se creent **a la demande** quand le besoin reel apparait, pas en prevention.
 
