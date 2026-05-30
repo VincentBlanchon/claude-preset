@@ -18,13 +18,13 @@ echo "Destination : $CLAUDE_DIR"
 echo ""
 
 # Skills a installer
-SKILLS=(init-project design-flow feature take-your-time)
+SKILLS=(init-project design-flow feature take-your-time canvas)
 
-# Creer les dossiers et copier les skills
+# Creer les dossiers et copier les skills (tout le contenu : SKILL.md + scripts bundles)
 echo "[1/2] Skills globaux..."
 for skill in "${SKILLS[@]}"; do
   mkdir -p "$CLAUDE_DIR/skills/$skill"
-  cp "$SCRIPT_DIR/skills/$skill/SKILL.md" "$CLAUDE_DIR/skills/$skill/SKILL.md"
+  cp -R "$SCRIPT_DIR/skills/$skill/." "$CLAUDE_DIR/skills/$skill/"
   echo "  -> /$skill installe"
 done
 
