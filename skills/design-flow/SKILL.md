@@ -27,8 +27,9 @@ Avant de builder, **proposer 3-5 directions distinctes** et laisser Vincent choi
 - Générer une page `/canvas` (mode décision) présentant les directions **en grille**, chacune avec :
   - un **mini-mockup réel** rendu aux tokens du projet (un aperçu HTML/CSS compact, pas une description), OU à défaut une vignette + 2 lignes.
   - un **titre** + le **parti-pris** (ex: « éditorial serif », « bold split », « minimal centré ») + le **tradeoff**.
+- **Toujours inclure une option « Aucune → relance »** dans la grille (+ un champ pour décrire la vibe/référence cherchée). Vincent doit pouvoir dire « aucune ne me parle » sans être coincé.
 - Vincent clique sa direction préférée (+ commentaire éventuel) → le retour revient via le serveur `/canvas`.
-- Si rien ne lui plaît → relancer une grille avec ses indications. Ne PAS builder avant qu'une direction soit choisie.
+- Si « Aucune » ou rien ne plaît → **relancer une grille avec des pistes différentes** (oser des directions plus originales/tendance : néo-brutalisme, bento, méga-typo, organique…), en tenant compte de ses indications. Ne PAS builder avant qu'une direction soit choisie.
 
 ## Étape 2 — BUILD
 
