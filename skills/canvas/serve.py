@@ -15,6 +15,7 @@ Usage (le port est choisi par l'appelant pour eviter de lire stdout) :
 """
 import argparse
 import json
+import subprocess
 import sys
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -27,10 +28,13 @@ def main() -> int:
     ap.add_argument("--out", required=True, help="Chemin du JSON resultat a ecrire")
     ap.add_argument("--port", type=int, default=0, help="Port (0 = auto)")
     ap.add_argument("--timeout", type=int, default=3600, help="Secondes avant auto-arret")
+    ap.add_argument("--focus-app", default=None,
+                    help="App macOS a ramener au premier plan apres submit (ex: Claude)")
     args = ap.parse_args()
 
     html_bytes = Path(args.html).read_bytes()
     out_path = Path(args.out)
+    focus_app = args.focus_app
     done = threading.Event()
 
     class Handler(BaseHTTPRequestHandler):
@@ -79,6 +83,14 @@ def main() -> int:
             self.send_header("Content-Length", str(len(resp)))
             self.end_headers()
             self.wfile.write(resp)
+            # ramene Claude (ou l'app demandee) au premier plan — l'utilisateur
+            # revient direct dans Claude apres avoir valide dans le navigateur
+            if focus_app:
+                try:
+                    subprocess.Popen(["open", "-a", focus_app],
+                                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                except Exception:
+                    pass
             done.set()
 
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)

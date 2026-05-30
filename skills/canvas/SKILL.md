@@ -21,6 +21,7 @@ C'est la **version interactive** de la regle globale de Vincent (« options A/B 
 1. **Ouvrir UNIQUEMENT dans le navigateur.** Ne JAMAIS ecrire la page avec l'outil Write en `.html` → ca declenche le panneau preview du Desktop (page en double). **Ecrire le fichier sous une extension NON-html** (ex: `page.canvas`) — `serve.py` le sert en `text/html` quoi qu'il arrive. Puis `open` l'URL.
 2. **La validation relance l'agent direct.** Le clic POST sur le serveur local → `serve.py` ecrit `result.json` et s'arrete → la tache background se termine → Claude est re-invoque automatiquement. Rien d'autre a faire cote Vincent.
 3. **L'onglet se ferme tout seul apres validation** (fonction `closeTab()` du scaffold).
+4. **Retour automatique sur Claude.** `serve.py --focus-app "Claude"` ramene la fenetre Claude Desktop au premier plan au moment du submit (via `open -a`). Vincent valide dans le navigateur et se retrouve direct dans Claude.
 
 ## Design — verrouille sur vncbln (NE PAS improviser)
 
@@ -57,8 +58,10 @@ Lire la valeur (ex: 51185).
 ### 3. Lancer le serveur (arriere-plan) + ouvrir le navigateur
 ```bash
 # (a) serveur — run_in_background: true — bloque jusqu'au submit puis sort seul
+#     --focus-app "Claude" ramene la fenetre Claude au premier plan apres le submit
 python3 ~/.claude/skills/canvas/serve.py \
-  --html "$DIR/page.canvas" --out "$DIR/result.json" --port __PORT__ --timeout 3600
+  --html "$DIR/page.canvas" --out "$DIR/result.json" --port __PORT__ --timeout 3600 \
+  --focus-app "Claude"
 ```
 ```bash
 # (b) ouvrir UNIQUEMENT le navigateur (foreground)
