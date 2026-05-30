@@ -18,10 +18,10 @@ echo "Destination : $CLAUDE_DIR"
 echo ""
 
 # Skills a installer
-SKILLS=(init-project design-flow feature take-your-time canvas)
+SKILLS=(init-project design-flow feature take-your-time canvas challenge)
 
 # Creer les dossiers et copier les skills (tout le contenu : SKILL.md + scripts bundles)
-echo "[1/2] Skills globaux..."
+echo "[1/3] Skills globaux..."
 for skill in "${SKILLS[@]}"; do
   mkdir -p "$CLAUDE_DIR/skills/$skill"
   cp -R "$SCRIPT_DIR/skills/$skill/." "$CLAUDE_DIR/skills/$skill/"
@@ -29,9 +29,18 @@ for skill in "${SKILLS[@]}"; do
 done
 
 # Copier la config globale (CLAUDE.md)
-echo "[2/2] Config globale (CLAUDE.md)..."
+echo "[2/3] Config globale (CLAUDE.md)..."
 cp "$SCRIPT_DIR/global/CLAUDE.md" "$CLAUDE_DIR/CLAUDE.md"
 echo "  -> ~/.claude/CLAUDE.md installe"
+
+# Installer les scripts de hooks (le cablage dans settings.json reste manuel/explicite)
+echo "[3/3] Hooks..."
+if [ -d "$SCRIPT_DIR/global/hooks" ]; then
+  mkdir -p "$CLAUDE_DIR/hooks"
+  cp "$SCRIPT_DIR/global/hooks/"*.sh "$CLAUDE_DIR/hooks/" 2>/dev/null || true
+  chmod +x "$CLAUDE_DIR/hooks/"*.sh 2>/dev/null || true
+  echo "  -> scripts de hooks copies dans ~/.claude/hooks/"
+fi
 
 echo ""
 echo "=== Installation terminee ==="

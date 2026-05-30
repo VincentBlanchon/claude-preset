@@ -64,6 +64,8 @@ For multi-step tasks, brief plan with explicit verify:
 
 Strong success criteria → autonomous looping is possible. Weak criteria ("make it work") → constant clarification needed.
 
+**Minimum safety net — even without /feature.** The `/feature` pipeline only triggers for big work (3+ steps, 4+ files). For ANY other code change (a quick fix, a tweak), before saying "done": run the project's typecheck + lint + tests if they exist (e.g. `npm run typecheck && npm run lint && npm run test:run`), and loop until green. Vincent doesn't read code → this is the only way to guarantee a "small" change didn't break anything. If the project has no such scripts, say so rather than claiming it's verified.
+
 ### How you know these rules are working
 
 Per the repo author: *"fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come BEFORE implementation rather than after mistakes."*
