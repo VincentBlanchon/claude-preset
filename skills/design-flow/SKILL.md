@@ -34,7 +34,7 @@ Avant de builder, **proposer 3-5 directions distinctes** et laisser Vincent choi
 ## Étape 2 — BUILD
 
 Construire la direction choisie, **production-ready**, aux tokens DESIGN.md, en réutilisant les composants `ui/`.
-- **Taste (goût assumé) — sortir du générique.** Typographies distinctives (jamais Arial/Times par défaut ; côté vncbln : DM Sans + Inter + Fraunces), palette à point de vue, au moins un détail mémorable. Anti-slop (répondre OUI) : CTA visible sans scroller ? hiérarchie claire ? au moins un choix spécifique au produit (pas interchangeable avec 20 startups) ? composants au service du contenu ?
+- **Taste / anti-slop — via le skill officiel `frontend-design`.** S'appuyer sur le skill **Anthropic `frontend-design`** (décisions de design audacieuses, anti « AI slop » — à activer via `/plugins`) comme référence de goût, plutôt qu'un jugement maison. Concrètement : typographies distinctives (côté vncbln : DM Sans + Inter + Fraunces), palette à point de vue, au moins un détail mémorable. Vérif anti-slop (OUI à tout) : CTA visible sans scroller ? hiérarchie claire ? un choix spécifique au produit (pas interchangeable avec 20 startups) ? composants au service du contenu ?
 - **États & accessibilité DÈS le build** (pas seulement à l'audit). Pour tout écran/flow, gérer d'office : états **erreur / vide / chargement**, **touch targets ≥ 44px**, **contraste WCAG AA**, **focus visible**. Penser le PARCOURS complet (ex : reset password = succès + erreurs + edge cases), pas juste l'écran heureux.
 - Micro-interactions CSS (hover/focus/active), transitions 150-300ms ease-out.
 

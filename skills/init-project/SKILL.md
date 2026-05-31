@@ -146,6 +146,7 @@ A partir des reponses Phase 1, redige `docs/vision-produit.md` (ne l'ecris pas e
 Propose un roadmap par phases (inspire du format ProjectReview) :
 
 - Phase 0 — Direction Artistique (design tokens, DESIGN.md, composants UI de base)
+  - Banque d'inspiration DESIGN.md (drop-in) : `VoltAgent/awesome-claude-design` (68 systèmes : Stripe, Vercel, Notion…) + `bergside/awesome-design-skills`. Proposer 2-3 directions à Vincent en s'en inspirant. Pour le goût/anti-slop : skill officiel Anthropic `frontend-design` (via `/plugins`).
 - Phase 1 — Fondations (schema DB, auth, structure, CI/CD)
 - Phase 2+ — Features metier par ordre de priorite
 
