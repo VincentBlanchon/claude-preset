@@ -62,10 +62,14 @@ python3 ~/.claude/skills/canvas/serve.py \
   --focus-app "Claude"
 ```
 ```bash
-# (b) ouvrir le navigateur (foreground)
-sleep 0.8 && open "http://127.0.0.1:__PORT__/"
+# (b) VERIFIER que le serveur repond AVANT d'ouvrir/annoncer (sinon lien mort)
+sleep 1 && curl -s -o /dev/null -w "%{http_code}" "http://127.0.0.1:__PORT__/"   # doit etre 200
 ```
-Annoncer « page ouverte, je t'attends » puis rendre la main.
+```bash
+# (c) ouvrir le navigateur (foreground) — uniquement si (b) = 200
+open "http://127.0.0.1:__PORT__/"
+```
+**REGLE ABSOLUE : ne JAMAIS annoncer le lien sans avoir lance le serveur (a) ET verifie qu'il repond 200 (b).** Le piege classique : faire `open` sans `serve.py` → lien mort. Puis annoncer « page ouverte » et rendre la main.
 4. **Lire `result.json`** → **rappeler le choix de Vincent en tete de reponse** (contrainte #5) → continuer.
 5. **Nettoyer** : `rm -rf "$DIR"`. Jamais commit.
 
