@@ -16,7 +16,7 @@ Vincent ne le tape jamais manuellement.
 ## Pipeline
 
 ### Phase 1 — Planification
-1. ARCHITECT (Opus) → plan.md + contrat-qualite.md
+1. ARCHITECT (Opus) → plan.md + contrat-qualite.md + **docs/progress/<feature>.json** (liste des features end-to-end, chacune `passing`/`failing` — la source de verite du « brique par brique », rendable en /canvas) + **claude-progress.txt** (etat synthetique pour reprise sur contexte frais)
 2. /codex:rescue — challenge du plan (TOUJOURS)
    - Prompt : "Challenge ce plan en architecte sceptique. Trouve les failles archi, la dette technique potentielle, les angles morts, les risques de scalabilite."
    - Read-only : Codex donne un avis, il ne reecrit pas le plan.
@@ -31,15 +31,16 @@ Vincent ne le tape jamais manuellement.
 ### Phase 3 — Implementation
 5. DEVELOPER (Opus) dans un git worktree isole → implemente selon le plan valide
 
-### Phase 4 — Review + QA (double review)
-6. /codex:review — review qualite du code
-   - Flags : --scope working-tree --wait
-   - Read-only : remonte les problemes, ne corrige rien.
-7. DEVELOPER integre le feedback Codex
-8. QA (Opus) → typecheck + lint + tests + build + code review
-   - Verdict : PASS / FAIL
-9. Si FAIL → /codex:rescue diagnostique + propose un fix
-   - DEVELOPER applique le fix → retour etape 8
+### Phase 4 — Review + QA (gate deterministe + double review)
+6. Review croisee du code :
+   - /codex:review (--scope working-tree --wait, read-only)
+   - **/code-review** en parallele (Code Review manage d'Anthropic : flotte d'agents anti-bugs sur infra Anthropic, avec etape anti-faux-positifs). Cumuler les deux remontees.
+7. DEVELOPER integre le feedback
+8. QA (Opus) — **GATE DETERMINISTE, doit etre 100% vert avant d'avancer** : typecheck + lint + tests + build.
+   - **Test E2E navigateur** (Claude-in-Chrome / Puppeteer MCP) du parcours utilisateur cle, exerce comme un humain — c'est ce qui attrape les bugs invisibles dans le code (le plus important pour Vincent, non-dev : il ne peut pas les voir lui-meme).
+   - Ne marquer une feature `passing` dans le JSON de progres qu'APRES un test E2E reussi. **Interdit de supprimer ou d'editer un test pour faire passer le gate** (ca masque des fonctionnalites manquantes/buggees).
+   - Verdict : PASS / FAIL.
+9. Si FAIL → /codex:rescue diagnostique + propose un fix → DEVELOPER applique → retour etape 8 (boucle jusqu'au vert).
 
 ### Phase 5 — Verification visuelle
 10. VERIFY-APP (Opus) → Computer Use + screenshots
