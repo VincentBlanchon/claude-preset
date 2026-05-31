@@ -34,8 +34,9 @@ Avant de builder, **proposer 3-5 directions distinctes** et laisser Vincent choi
 ## Étape 2 — BUILD
 
 Construire la direction choisie, **production-ready**, aux tokens DESIGN.md, en réutilisant les composants `ui/`.
+- **Taste (goût assumé) — sortir du générique.** Typographies distinctives (jamais Arial/Times par défaut ; côté vncbln : DM Sans + Inter + Fraunces), palette à point de vue, au moins un détail mémorable. Anti-slop (répondre OUI) : CTA visible sans scroller ? hiérarchie claire ? au moins un choix spécifique au produit (pas interchangeable avec 20 startups) ? composants au service du contenu ?
+- **États & accessibilité DÈS le build** (pas seulement à l'audit). Pour tout écran/flow, gérer d'office : états **erreur / vide / chargement**, **touch targets ≥ 44px**, **contraste WCAG AA**, **focus visible**. Penser le PARCOURS complet (ex : reset password = succès + erreurs + edge cases), pas juste l'écran heureux.
 - Micro-interactions CSS (hover/focus/active), transitions 150-300ms ease-out.
-- Anti-slop (répondre OUI) : CTA visible sans scroller ? hiérarchie claire ? au moins un choix spécifique au produit (pas interchangeable avec 20 startups) ? composants au service du contenu ?
 
 ## Étape 3 — VISUAL REVIEW → `/canvas`
 
@@ -69,5 +70,6 @@ Verdict final présenté **visuellement** (page `/canvas`, mode explain/décisio
 
 ## Notes
 - **Tous les gates passent par `/canvas`** (Explore, Visual Review, Gate). Voir le skill `/canvas` pour la mécanique (page tmp non-.html, serveur auto-fermant `--focus-app "Claude"`, zéro trace).
+- **Visuels & graphiques (posters, images, assets, PNG)** ≠ UI d'app. Pour ça, utiliser la capacité de **design natif de Claude** (skill officiel Anthropic « canvas-design » / artifacts) qui produit et exporte des PNG sans Figma. **Ne PAS confondre** avec le `/canvas` interactif de Vincent (pages de décision/explication). L'activer via `/plugins` si pas dispo. Cas d'usage : assets marketing pour vncbln.
 - Si la feature est grosse (3+ étapes, 4+ fichiers, route/auth/paiement), c'est `/feature` qui orchestre et appelle `/design-flow` pour la partie UI.
 - Argument optionnel : `/design-flow <page/composant>` cible directement cet écran.
