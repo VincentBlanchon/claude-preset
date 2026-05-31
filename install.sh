@@ -18,7 +18,7 @@ echo "Destination : $CLAUDE_DIR"
 echo ""
 
 # Skills a installer
-SKILLS=(init-project design-flow feature take-your-time canvas challenge patterns)
+SKILLS=(init-project design-flow feature take-your-time canvas patterns)
 
 # Creer les dossiers et copier les skills (tout le contenu : SKILL.md + scripts bundles)
 echo "[1/3] Skills globaux..."
