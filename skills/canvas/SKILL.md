@@ -53,7 +53,7 @@ Renvoie : `{ "mode":"explain", "verdict":"clear|question", "comment":"..." }`
 ## Procedure (a chaque fois)
 
 1. **Port libre** : `python3 -c 'import socket;s=socket.socket();s.bind(("127.0.0.1",0));print(s.getsockname()[1]);s.close()'`
-2. **Generer** `"${TMPDIR:-/tmp}/claude-canvas/<slug>/page.canvas"` (extension non-html) depuis le scaffold, en remplacant `__PORT__`. Adapter header/cartes/schema. Garder le `<script>`.
+2. **Generer** `"${TMPDIR:-/tmp}/claude-canvas/<slug>/page.canvas"` (extension non-html) depuis le scaffold, en remplacant `__PORT__` ET `__PROJECT__` (nom du repo/projet en cours : `basename "$(git rev-parse --show-toplevel 2>/dev/null)"`, sinon le contexte — ex: « vncbln », « Projet X », « Système »). Adapter header/cartes/schema. Garder le `<script>`.
 3. **Serveur (arriere-plan) + navigateur** :
 ```bash
 # (a) run_in_background: true — bloque jusqu'au submit puis sort seul
@@ -76,6 +76,8 @@ open "http://127.0.0.1:__PORT__/"
 ## Regles
 - **PROFONDEUR (IMPORTANT).** Une page doit **enseigner**, pas juste lister. Toute notion / terme technique mentionne → l'**expliquer** en une phrase + une analogie courte (calibrage Vincent : ni jargon qui perd, ni ton infantilisant). Donner le POURQUOI et le contexte, pas des cartes laconiques. Test : si la page se lit en 10s sans que Vincent ait rien appris ni compris l'enjeu, elle est **trop pauvre** — l'enrichir (sections explicatives, schema, exemples concrets, tradeoffs detailles).
 - **COMMENTAIRE TOUJOURS, ET VALIDATION AU COMMENTAIRE SEUL.** Chaque page a un champ commentaire. Le bouton Valider s'active des qu'il y a **une option choisie OU du texte dans le commentaire** — Vincent doit pouvoir valider en ecrivant juste un commentaire, sans cliquer d'option. Son commentaire libre prime toujours sur les options proposees.
+- **CONTEXTE PROJET TOUJOURS VISIBLE.** Nom du repo/projet en cours en haut de page (`.proj`) ET dans le `<title>` (= le nom visible dans l'onglet du navigateur). Vincent jongle entre projets : il doit savoir d'un coup d'oeil sur quoi porte la page.
+- **NE JAMAIS RETIRER closeTab() + `--focus-app "Claude"`.** Valider → l'onglet se ferme tout seul → le focus revient sur Claude. C'est ce qui evite l'accumulation d'onglets et garde Vincent dans son flux. Comportement obligatoire sur chaque page.
 - **Never kill** : `serve.py` s'auto-ferme (submit/timeout). Jamais `kill`/`pkill`. Port pris → en changer.
 - **Surgical** : page jetable, un fichier, pas de framework.
 - **Fallback** : serveur injoignable → le scaffold copie le payload et affiche « colle dans Claude ».
@@ -88,7 +90,7 @@ open "http://127.0.0.1:__PORT__/"
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Canvas</title>
+<title>__PROJECT__ · /canvas</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
@@ -104,6 +106,8 @@ open "http://127.0.0.1:__PORT__/"
   *{box-sizing:border-box} html,body{margin:0}
   body{background:var(--bg); color:var(--fg); font-family:var(--font-sans); -webkit-font-smoothing:antialiased;
     padding:56px 24px 120px; max-width:720px; margin:0 auto;}
+  .proj{font-family:var(--font-mono); font-size:11px; font-weight:500; color:var(--muted); background:var(--card); border:1px solid var(--border); border-radius:6px; padding:5px 10px; display:inline-flex; align-items:center; gap:6px; margin:0 0 18px}
+  .proj b{color:var(--fg); font-weight:600}
   .kicker{font-family:var(--font-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); margin:0 0 12px}
   h1{font-family:var(--font-display); font-size:23px; font-weight:600; letter-spacing:-.01em; margin:0 0 8px; line-height:1.25}
   .sub{color:var(--muted); margin:0 0 32px; font-size:14px}
@@ -139,6 +143,8 @@ open "http://127.0.0.1:__PORT__/"
 </style>
 </head>
 <body>
+  <!-- __PROJECT__ = nom du repo/projet en cours (basename du repo git, ou contexte). Toujours present, en haut ET dans le <title>. -->
+  <div class="proj">📁 Projet : <b>__PROJECT__</b></div>
   <!-- ADAPTER header + cartes (mode decision ci-dessous) -->
   <p class="kicker">Décision · /canvas</p>
   <h1>Question à trancher</h1>
