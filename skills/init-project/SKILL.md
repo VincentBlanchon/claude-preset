@@ -12,9 +12,13 @@ REGLE ABSOLUE : ne cree AUCUN fichier, ne lance AUCUNE commande tant que la Phas
 
 ---
 
+## PHASE 0 — Charger les patterns transversaux
+
+Avant la decouverte : lire `~/.claude/patterns/` (skill `/patterns`) et reproposer les conventions habituelles de Vincent (« comme d'hab tu pars sur X — on garde ? »). Evite de redemander a chaque nouveau projet ce qui est deja une habitude.
+
 ## PHASE 1 — Decouverte approfondie
 
-Tu es un product manager senior. Ton objectif : comprendre le projet en profondeur AVANT de toucher au code. Pose ces questions UNE PAR UNE (pas tout d'un coup, c'est trop). Adapte la suite selon les reponses.
+Tu es un product manager senior. Ton objectif : comprendre le projet en profondeur AVANT de toucher au code. Pose ces questions UNE PAR UNE (pas tout d'un coup, c'est trop). Adapte la suite selon les reponses. Quand il y a une decision a trancher ou un concept a expliquer, ouvre une page `/canvas` (interface visuelle de Vincent) plutot qu'un pave terminal.
 
 ### Bloc 1 — Le probleme
 - C'est quoi ce projet ? En une phrase.
@@ -190,22 +194,17 @@ Modele base sur Bridge/ClubHouse :
 
 ## Design Workflow
 
-Pipeline UI en 5 etapes via `/design-flow [page]` :
+Pipeline UI pilote a l'oeil via `/design-flow [page]`, tout dans `/canvas` :
+**EXPLORE** (3-5 directions en grille, Vincent choisit a l'oeil + option « aucune → relance ») → **BUILD** (tokens DESIGN.md + composants ui/) → **REVUE VISUELLE** (recos cochables en /canvas) → **AUDIT + verif** → **GATE**.
 
-1. **Frontend Design** — build la page (tokens DESIGN.md + composants ui/)
-2. **Critique** — review design director (score /10 + issues P0-P3)
-3. **Typeset** — affiner typo et hierarchie
-4. **Polish** — passe qualite finale pixel-perfect
-5. **Audit** — audit technique (a11y, perf, responsive, anti-patterns)
+Fichier cle : `DESIGN.md` (tokens) — prime TOUJOURS.
 
-Fichier cle : `DESIGN.md` (tokens). DESIGN.md prime TOUJOURS sur les suggestions des etapes.
-
-IMPORTANT: Quand Vincent demande de creer ou modifier une page, modale, dashboard, formulaire, ou tout composant avec une UI visible — lancer automatiquement le pipeline `/design-flow`. Ne pas attendre qu'il le demande explicitement.
+IMPORTANT: Des que Vincent demande de creer ou modifier une UI (page, modale, dashboard, formulaire, composant) — lancer automatiquement `/design-flow`. Ne pas attendre qu'il le demande.
 
 ## Workflow feature
 
 Pour toute feature non triviale, Claude lance AUTOMATIQUEMENT le skill global `/feature` qui orchestre :
-architect → plan → Codex challenge → branche → implementation → QA → review Codex → verification visuelle → PR.
+plan + suivi (feature-list JSON) → challenge Codex → branche → implementation → review croisee (Codex + `/code-review` manage) → **QA gate deterministe** (typecheck/lint/tests/build + **test E2E navigateur**) → audit secu → PR.
 
 Tu n'as rien a taper — Claude detecte la complexite (plan > 3 etapes, 4+ fichiers, nouvelle page, code sensible touchant auth/paiement/donnees) et lance le pipeline.
 
