@@ -74,6 +74,8 @@ open "http://127.0.0.1:__PORT__/"
 5. **Nettoyer** : `rm -rf "$DIR"`. Jamais commit.
 
 ## Regles
+- **PROFONDEUR (IMPORTANT).** Une page doit **enseigner**, pas juste lister. Toute notion / terme technique mentionne → l'**expliquer** en une phrase + une analogie courte (calibrage Vincent : ni jargon qui perd, ni ton infantilisant). Donner le POURQUOI et le contexte, pas des cartes laconiques. Test : si la page se lit en 10s sans que Vincent ait rien appris ni compris l'enjeu, elle est **trop pauvre** — l'enrichir (sections explicatives, schema, exemples concrets, tradeoffs detailles).
+- **COMMENTAIRE TOUJOURS, ET VALIDATION AU COMMENTAIRE SEUL.** Chaque page a un champ commentaire. Le bouton Valider s'active des qu'il y a **une option choisie OU du texte dans le commentaire** — Vincent doit pouvoir valider en ecrivant juste un commentaire, sans cliquer d'option. Son commentaire libre prime toujours sur les options proposees.
 - **Never kill** : `serve.py` s'auto-ferme (submit/timeout). Jamais `kill`/`pkill`. Port pris → en changer.
 - **Surgical** : page jetable, un fichier, pas de framework.
 - **Fallback** : serveur injoignable → le scaffold copie le payload et affiche « colle dans Claude ».
@@ -153,11 +155,11 @@ open "http://127.0.0.1:__PORT__/"
     </div>
   </div>
 
-  <label class="cmt" for="comment">Commentaire (optionnel)</label>
-  <textarea id="comment" placeholder="Nuance, autre option…"></textarea>
+  <label class="cmt" for="comment">Commentaire — tu peux valider avec ça seul, sans choisir d'option</label>
+  <textarea id="comment" placeholder="Ton avis libre, une nuance, une autre piste… (suffit pour valider)"></textarea>
 
   <div class="bar">
-    <span class="hint" id="hint">Choisis une option</span>
+    <span class="hint" id="hint">Choisis une option, ou écris juste un commentaire</span>
     <button id="copy">Copier</button>
     <button class="primary" id="send" disabled>Valider mon choix</button>
   </div>
@@ -174,12 +176,21 @@ open "http://127.0.0.1:__PORT__/"
   const SUBMIT_URL = "http://127.0.0.1:__PORT__/submit"; // URL ABSOLUE => marche depuis toute surface
   let choice = null;
   const cards = [...document.querySelectorAll('#opts .card')];
-  function pick(c){ cards.forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); choice=c.dataset.id;
-    document.getElementById('send').disabled=false; document.getElementById('hint').textContent='› '+choice; }
+  const commentEl = document.getElementById('comment');
+  const sendBtn = document.getElementById('send');
+  const hintEl = document.getElementById('hint');
+  // Valider possible avec une OPTION *ou* un COMMENTAIRE seul.
+  function refreshSend(){
+    const hasComment = commentEl.value.trim().length > 0;
+    sendBtn.disabled = !(choice || hasComment);
+    hintEl.textContent = choice ? '› '+choice : (hasComment ? '› commentaire seul' : 'Choisis une option, ou écris juste un commentaire');
+  }
+  function pick(c){ cards.forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); choice=c.dataset.id; refreshSend(); }
   cards.forEach(c => { c.addEventListener('click',()=>pick(c));
     c.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(c);} }); });
+  commentEl.addEventListener('input', refreshSend);
   function payload(){ return { mode:'decision', choice, choices: choice?[choice]:[],
-    comment: document.getElementById('comment').value.trim() }; }
+    comment: commentEl.value.trim() }; }
   function closeTab(){ try{ window.open('','_self'); window.close(); }catch(e){}
     try{ window.close(); }catch(e){}
     setTimeout(()=>{ try{ window.open('about:blank','_self'); window.close(); }catch(e){} }, 150); }
@@ -201,6 +212,7 @@ open "http://127.0.0.1:__PORT__/"
   document.getElementById('copy').addEventListener('click', async ()=>{
     try{ await navigator.clipboard.writeText(JSON.stringify(payload())); document.getElementById('hint').textContent='copié ✓'; }catch(_){}
   });
+  refreshSend(); // etat initial coherent
 </script>
 </body>
 </html>
