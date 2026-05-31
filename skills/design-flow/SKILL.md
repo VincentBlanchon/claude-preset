@@ -1,200 +1,75 @@
 ---
 name: design-flow
-description: Pipeline UI complet en 5 etapes (brief, build, visual review, audit, release gate). Utiliser quand Vincent demande de creer ou modifier une page, modale, dashboard, formulaire, ou tout composant avec une UI visible.
+description: Pipeline UI piloté à l'œil dans /canvas — explorer plusieurs directions, choisir, builder, réviser visuellement, livrer. Utiliser quand Vincent demande de créer ou modifier une page, modale, dashboard, formulaire, ou tout composant avec une UI visible.
 ---
 
-# /design-flow — Pipeline UI en 5 etapes
+# /design-flow — Pipeline UI piloté dans /canvas
 
-Pipeline complet pour creer ou ameliorer une interface. Execute les 5 etapes dans l'ordre.
-Si un argument est fourni (ex: `/design-flow page pricing`), l'appliquer a cette page/composant.
+Vincent est **non-dev, bosse dans Claude Desktop, décide à l'œil** (il ne lit pas le terminal). Ce pipeline le fait **choisir et valider en cliquant dans des pages `/canvas`**, jamais devant un pavé de texte. À chaque gate visuel → utiliser le skill **`/canvas`** (page HTML interactive, ouverte dans le navigateur, retour auto).
 
-## Regles absolues
+## Règles absolues
 
-- **DESIGN.md prime sur tout.** Si le projet a un fichier DESIGN.md (tokens, palette, typo, spacing, radii, shadows), le lire en premier et le respecter a la lettre.
-- **Reutiliser les composants existants.** Si le projet a un dossier src/components/ui/, utiliser les composants existants. Ne jamais recreer un Button, Card, Input, Badge ou Modal.
-- **Coherence avec l'existant.** Avant de coder, lire les pages existantes du projet pour comprendre les patterns en place (structure de sections, style de headings, spacing entre blocs). Le nouveau code doit s'inscrire dans l'existant, pas partir d'une page blanche.
-- **Classes et variables existantes.** Verifier les classes CSS / variables Tailwind / tokens deja utilises dans le projet. Ne pas inventer de nouvelles valeurs quand il en existe deja.
-
----
-
-## Etape 0 — BRIEF
-
-Avant de coder quoi que ce soit, etablir un brief minimum :
-- **Audience** : pour qui est cette page/composant ?
-- **Action primaire** : que doit faire l'utilisateur ?
-- **CTA principal** : quel est le call-to-action dominant ?
-- **Priorite de contenu** : quelles infos en premier, lesquelles secondaires ?
-- **Contraintes** : tokens DESIGN.md, composants ui/ disponibles, references visuelles
-
-Si Vincent fournit ces infos dans sa demande, les extraire. Sinon, poser les questions manquantes rapidement — pas un interrogatoire, juste ce qui manque pour ne pas designer dans le vide.
+- **DESIGN.md prime sur tout.** Lire le `DESIGN.md` du projet en premier et le respecter à la lettre (tokens, palette, typo, spacing, radii). Pour vncbln : beige `#f2ead8`, vert `#3f5a2a`, terracotta `#b85436`, **Inter + DM Sans** (oui, Inter — c'est SON système). Si pas de DESIGN.md mais un site live, en extraire les tokens.
+- **Réutiliser les composants existants** (`src/components/ui/`). Ne jamais recréer Button/Card/Input/Badge/Modal.
+- **Cohérence avec l'existant.** Lire les pages existantes (structure, patterns, spacing) avant de coder. S'inscrire dans l'existant, pas page blanche.
+- **Pas d'invention de valeurs** quand des tokens/classes existent déjà.
 
 ---
 
-## Etape 1 — BUILD
+## Étape 0 — BRIEF (rapide)
 
-Construire l'interface.
+Extraire de la demande : **audience**, **action primaire / CTA**, **priorité de contenu**, **contraintes** (DESIGN.md, composants dispo, références). Si une info clé manque, la demander en une question — pas un interrogatoire. Lire DESIGN.md + pages existantes.
 
-### Avant de coder
-- Lire DESIGN.md
-- Lire les composants ui/ existants
-- Parcourir les pages existantes du projet (patterns, styles, structure)
-- Relire le brief
+## Étape 1 — EXPLORE (la nouveauté clé) → `/canvas`
 
-### Direction esthetique
-Si DESIGN.md definit le style : le respecter. Sinon, choisir une direction intentionnelle :
-- **Typographie** : polices distinctives. JAMAIS Inter, Roboto, Arial, system fonts generiques
-- **Couleurs** : palette cohesive avec des accents forts
-- **Motion** : animations pour les micro-interactions. CSS-only prefere
-- **Composition** : espace negatif genereux, hierarchie claire
-- **Fond & details** : atmosphere et profondeur quand pertinent
+Avant de builder, **proposer 3-5 directions distinctes** et laisser Vincent choisir à l'œil (pattern Claude Design / Thariq : « 6 approches en grille »).
 
-### Anti-slop — Criteres de qualite
-Le design doit repondre OUI a ces questions :
-- Le CTA principal est-il visible sans scroller ?
-- La hierarchie est-elle claire (on sait ou regarder en premier) ?
-- Y a-t-il au moins un choix de design specifique au produit (pas interchangeable avec 20 autres startups) ?
-- Les composants sont-ils utilises parce qu'ils servent le contenu, pas parce qu'ils "font premium" ?
+- Générer une page `/canvas` (mode décision) présentant les directions **en grille**, chacune avec :
+  - un **mini-mockup réel** rendu aux tokens du projet (un aperçu HTML/CSS compact, pas une description), OU à défaut une vignette + 2 lignes.
+  - un **titre** + le **parti-pris** (ex: « éditorial serif », « bold split », « minimal centré ») + le **tradeoff**.
+- **Toujours inclure une option « Aucune → relance »** dans la grille (+ un champ pour décrire la vibe/référence cherchée). Vincent doit pouvoir dire « aucune ne me parle » sans être coincé.
+- Vincent clique sa direction préférée (+ commentaire éventuel) → le retour revient via le serveur `/canvas`.
+- Si « Aucune » ou rien ne plaît → **relancer une grille avec des pistes différentes** (oser des directions plus originales/tendance : néo-brutalisme, bento, méga-typo, organique…), en tenant compte de ses indications. Ne PAS builder avant qu'une direction soit choisie.
 
-Si la reponse est NON a l'une d'entre elles : corriger avant de passer a l'etape suivante.
+## Étape 2 — BUILD
 
-### Implementation
-- Code production-ready et fonctionnel
-- Si DESIGN.md existe : respecter ses tokens
-- Si composants ui/ existent : les reutiliser
+Construire la direction choisie, **production-ready**, aux tokens DESIGN.md, en réutilisant les composants `ui/`.
+- **Taste / anti-slop — via le skill officiel `frontend-design`.** S'appuyer sur le skill **Anthropic `frontend-design`** (décisions de design audacieuses, anti « AI slop » — à activer via `/plugins`) comme référence de goût, plutôt qu'un jugement maison. Concrètement : typographies distinctives (côté vncbln : DM Sans + Inter + Fraunces), palette à point de vue, au moins un détail mémorable. Vérif anti-slop (OUI à tout) : CTA visible sans scroller ? hiérarchie claire ? un choix spécifique au produit (pas interchangeable avec 20 startups) ? composants au service du contenu ?
+- **États & accessibilité DÈS le build** (pas seulement à l'audit). Pour tout écran/flow, gérer d'office : états **erreur / vide / chargement**, **touch targets ≥ 44px**, **contraste WCAG AA**, **focus visible**. Penser le PARCOURS complet (ex : reset password = succès + erreurs + edge cases), pas juste l'écran heureux.
+- Micro-interactions CSS (hover/focus/active), transitions 150-300ms ease-out.
 
----
+## Étape 3 — VISUAL REVIEW → `/canvas`
 
-## Etape 2 — VISUAL REVIEW
+**C'est l'étape collaborative — Vincent décide en regardant + en cliquant.**
 
-**C'est l'etape collaborative. Claude propose, Vincent decide.**
+1. Lancer le rendu : démarrer le dev server, `open http://localhost:...`. Screenshots 375 / 768 / 1440 si possible.
+2. Faire les 3 passes d'analyse (sans modifier le code) :
+   - **A — Structure & emphase** : focal point dans le 1er viewport, densité, frontières de sections, copy spécifique, CTA = next step logique.
+   - **B — Typo & contenu** : échelle harmonieuse, line-heights (titres serrés, corps aérés), largeurs 45-75 caractères, contenu crédible.
+   - **C — Finish & états** : hover/focus/active/disabled, transitions, empty/loading states, responsive 375/768, textes longs (ellipsis/line-clamp).
+3. **Présenter les recommandations via `/canvas`** (PAS un pavé terminal) : une page où **chaque reco est une carte cochable** (multi-sélection), regroupées par passe, avec le lien localhost en tête. Vincent coche celles à appliquer (+ commentaire libre pour ses propres demandes).
+4. Appliquer les recos cochées + le feedback de Vincent. Relancer le localhost, re-vérifier.
 
-### Lancer le rendu
-- Demarrer le serveur de dev (`npm run dev`, `pnpm dev`, ou equivalent)
-- Ouvrir la page dans le navigateur de Vincent (`open http://localhost:...`)
-- Si possible, prendre des screenshots a 375px, 768px, et 1440px
+## Étape 4 — AUDIT + VÉRIF (auto)
 
-### Analyser et recommander (3 passes)
+Vérification technique avant livraison — **tourne sans déranger Vincent** :
+- **Code** : typecheck + lint + tests du projet (ex: `npm run typecheck && npm run lint && npm run test:run`) → boucle jusqu'au vert. (Le hook auto-format a déjà reformaté.)
+- **a11y** : contrastes WCAG AA (4.5:1 / 3:1), focus visible, aria-labels, ordre de tab, alt text, labels de formulaire.
+- **Perf** : images optimisées (<200KB) + lazy below-the-fold, pas de layout shift, animations en transform/opacity uniquement.
+- **Responsive** : 375/768/1440, pas de scroll horizontal, touch targets ≥44px, texte ≥16px mobile.
+- **Anti-patterns** : pas de z-index>50 injustifié, pas de `!important` (hors reset), pas de magic numbers, pas de couleurs hardcodées (tokens only), pas de `console.log`.
+Corriger les issues. Garder la liste des warnings pour le gate.
 
-**Passe A — Structure et emphase :**
-- Le focal point est-il clair dans le premier viewport ?
-- La densite est-elle equilibree (pas trop vide, pas trop charge) ?
-- Les sections ont-elles des frontieres claires ?
-- Le copy est-il specifique (pas generique/placeholder) ?
-- Le CTA correspond-il au next step logique de l'utilisateur ?
+## Étape 5 — RELEASE GATE → `/canvas`
 
-**Passe B — Typographie et contenu :**
-- L'echelle typographique est-elle harmonieuse ?
-- Les line-heights sont-ils corrects (titres serres, corps aeres) ?
-- Les largeurs de ligne sont-elles dans la zone 45-75 caracteres ?
-- Le contenu est-il credible et coherent avec le produit ?
-
-**Passe C — Finish et etats :**
-- Les etats interactifs sont-ils definis (hover, focus, active, disabled) ?
-- Les transitions sont-elles fluides (150-300ms, ease-out) ?
-- Les empty states et loading states sont-ils geres ?
-- Le responsive tient-il a 375px et 768px ?
-- Les textes longs sont-ils geres (ellipsis, line-clamp) ?
-
-### Presenter les recommandations
-
-Afficher les recommandations a Vincent avec ce format :
-
-```
-VISUAL REVIEW — [Page/Composant]
-
-Localhost : http://localhost:[port]/[path]
-
-Passe A — Structure :
-- [observations + recommandations]
-
-Passe B — Typo & contenu :
-- [observations + recommandations]
-
-Passe C — Finish :
-- [observations + recommandations]
-```
-
-**NE PAS MODIFIER LE CODE.** Attendre le retour de Vincent.
-Vincent regarde le localhost de son cote, lit les recommandations, et reagit :
-- "ok, fais tout" → appliquer toutes les recommandations
-- "le hero est trop charge" → integrer ce feedback + les recommandations validees
-- "non, je prefere comme ca" → ne pas toucher ce point
-
-Apres les corrections, relancer le localhost si besoin et verifier visuellement.
+Verdict final présenté **visuellement** (page `/canvas`, mode explain/décision) — jamais de « COMPLETE » automatique. Récapituler :
+- Brief respecté · DESIGN.md respecté · composants réutilisés · cohérence projet · audit+vérif PASS · warnings restants.
+- Verdict : **READY / READY WITH WARNINGS / NOT READY**, et la décision à Vincent (livrer / corriger un point).
 
 ---
 
-## Etape 3 — TECHNICAL AUDIT
-
-Derniere verification technique avant livraison.
-
-### Accessibilite (a11y)
-- Contrastes WCAG AA (4.5:1 texte normal, 3:1 gros texte)
-- Focus visible sur tous les elements interactifs
-- aria-labels sur les elements sans texte visible
-- Ordre de tabulation logique
-- Images avec alt text
-- Formulaires avec labels associes
-
-### Performance
-- Pas d'images non optimisees (> 200KB)
-- Pas de CSS/JS inline massif
-- Lazy loading sur les images below-the-fold
-- Pas de layout shift (CLS)
-- Animations via transform/opacity uniquement (pas de top/left/width)
-
-### Responsive
-- Verifie a 375px, 768px, 1440px (si screenshots disponibles, les utiliser)
-- Pas de scroll horizontal
-- Touch targets >= 44x44px sur mobile
-- Texte lisible sans zoom sur mobile (>= 16px)
-
-### Anti-patterns
-- Pas de z-index > 50 sans justification
-- Pas de !important sauf reset
-- Pas de magic numbers (valeurs hardcodees sans token)
-- Pas de duplication de styles (extraire dans un composant)
-- Pas de console.log oublies
-- Pas de couleurs hardcodees — tout via tokens/variables CSS
-
-### Output
-```
-AUDIT: [PASS/FAIL]
-a11y:         [OK/X issues]
-Performance:  [OK/X issues]
-Responsive:   [OK/X issues]
-Anti-patterns: [OK/X issues]
-```
-
-Corriger les issues. Lister les warnings.
-
----
-
-## Etape 4 — RELEASE GATE
-
-Verification finale. Pas de "COMPLETE" automatique.
-
-### Checklist
-- [ ] Le brief initial est-il respecte (audience, action, CTA) ?
-- [ ] Le DESIGN.md est-il respecte (tokens, couleurs, typo) ?
-- [ ] Les composants ui/ existants sont-ils reutilises ?
-- [ ] Le style est-il coherent avec les autres pages du projet ?
-- [ ] L'audit technique est-il PASS ?
-- [ ] Vincent a-t-il valide le visuel ?
-
-### Verdict
-
-```
-RELEASE GATE — [Page/Composant]
-
-Brief respecte :     [oui/non]
-Design system :      [oui/non]
-Coherence projet :   [oui/non]
-Audit technique :    [PASS/FAIL]
-Validation Vincent : [oui/non]
-
-Verdict : [READY / READY WITH WARNINGS / NOT READY]
-
-Warnings non resolus :
-- [liste ou "aucun"]
-```
+## Notes
+- **Tous les gates passent par `/canvas`** (Explore, Visual Review, Gate). Voir le skill `/canvas` pour la mécanique (page tmp non-.html, serveur auto-fermant `--focus-app "Claude"`, zéro trace).
+- **Visuels & graphiques (posters, images, assets, PNG)** ≠ UI d'app. Pour ça, utiliser la capacité de **design natif de Claude** (skill officiel Anthropic « canvas-design » / artifacts) qui produit et exporte des PNG sans Figma. **Ne PAS confondre** avec le `/canvas` interactif de Vincent (pages de décision/explication). L'activer via `/plugins` si pas dispo. Cas d'usage : assets marketing pour vncbln.
+- Si la feature est grosse (3+ étapes, 4+ fichiers, route/auth/paiement), c'est `/feature` qui orchestre et appelle `/design-flow` pour la partie UI.
+- Argument optionnel : `/design-flow <page/composant>` cible directement cet écran.

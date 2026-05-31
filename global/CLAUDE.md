@@ -130,3 +130,10 @@ If the hook fails or you're not in these projects, fall back to manual:
 - **On project entry**: `git pull` to grab the latest changes.
 - **On project exit** (when Vincent says he's done, or end of session): `git add -A && git commit -m "chore: sync" && git push` if any files changed.
 - **After a claude-preset pull**: Run `./install.sh` to update the global skills on this machine.
+
+## Interface visuelle — /canvas (Desktop-first)
+
+Vincent bosse dans Claude Desktop, ne lit ni le code ni le terminal, decide a l'oeil, brique par brique.
+- Pour faire trancher une decision ou expliquer un concept : ouvrir une page **`/canvas`** (page HTML locale interactive, ephemere, zero trace) plutot qu'un pave terminal. Choix triviaux : `AskUserQuestion`.
+- Explication calibree : toujours une petite explication, ni jargon qui perd, ni ton infantilisant (il connait, il apprend).
+- `/design-flow` route ses gates (explore, revue, gate) via `/canvas`. `/patterns` garde les conventions reutilisables entre projets (`~/.claude/patterns/`).
