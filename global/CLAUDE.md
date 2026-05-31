@@ -119,14 +119,9 @@ When 2+ tasks are independent, parallelize. When sequential, chain.
 
 ## Auto sync — multi-machine projects
 
-The SessionStart hook `~/.claude/hooks/git-diagnostic.sh` handles this automatically for these projects:
-- `/Users/vincentblanchon/Developer/Carriere`
-- `/Users/vincentblanchon/Developer/veille-tech`
-- `/Users/vincentblanchon/Developer/claude-preset` — source of truth for skills and config
-- `/Users/vincentblanchon/Developer/Perso/Carriere`
-- `/Users/vincentblanchon/Developer/Perso/Vie`
+Several repos are shared between Vincent's two Macs (different usernames AND folder names — e.g. `veille-tech` vs `Veille tech`). The SessionStart hook `~/.claude/hooks/git-diagnostic.sh` flags out-of-sync state automatically, matching repos by their **git remote** (portable across machines), NOT by absolute path. Covered repos (by remote name): `claude-preset` (source of truth for skills & config), `veille-tech`, `Carriere`, `Vie`. To add one: edit the `case` on the remote in that hook.
 
-If the hook fails or you're not in these projects, fall back to manual:
+If the hook doesn't fire (or you're outside these repos), fall back to manual:
 - **On project entry**: `git pull` to grab the latest changes.
 - **On project exit** (when Vincent says he's done, or end of session): `git add -A && git commit -m "chore: sync" && git push` if any files changed.
 - **After a claude-preset pull**: Run `./install.sh` to update the global skills on this machine.
