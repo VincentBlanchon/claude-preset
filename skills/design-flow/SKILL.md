@@ -35,6 +35,25 @@ Export → **"Hand off to Claude Code"**. Bundle cree = fichiers de design + le 
 
 **5. Regle d'or : ne JAMAIS designer ET coder dans la meme conversation.** Claude Design = exploration visuelle, Claude Code = production. Melanger = heures perdues. La frontiere, c'est le Handoff.
 
+## Anti-AI-slop : les tells a bannir (signature "full IA" interdite)
+
+Vincent reconnait et DETESTE le look "genere par IA". Ces tells sont INTERDITS par defaut (sauf si le DESIGN.md du projet les demande). Cette liste sert DEUX fois : Claude Code l'applique a l'implementation, ET on la colle dans la section "Do's and Don'ts" du design system Claude Design (avec le codebase lie, c'est ce qui tue le rendu generique).
+
+BANNIR :
+- **Les pilules** (border-radius pleine rondeur / 9999px sur boutons, badges, inputs). Utiliser le radius du projet (vncbln : 8px, carre et sobre).
+- **Les bordures epaisses / le tout-encadre** (chaque carte ceinturee d'un trait). Separer par l'espace, un fond legerement teinte, ou un filet 1px discret. Pas une boite partout.
+- **Les degrades** (surtout violet/indigo "gradient IA"). Aplats, couleurs franches de la palette.
+- **Le blur / glassmorphism** (backdrop-filter, verre depoli). Surfaces nettes.
+- **Les ombres molles / glow**. Ombres rares et subtiles, ou pas d'ombre.
+- **Les em dashes (—)** dans les textes. Virgule, point, parentheses.
+- **Les emojis en puces ou dans les titres**. Puces sobres, pas de glyphes.
+- **L'accent violet/indigo par defaut** (shadcn brut). La palette du projet (vncbln : vert olive + terracotta).
+- **Tout centre** (hero texte centre + 2 boutons pilules + degrade = la landing IA type). Compositions asymetriques, editoriales, du vide assume.
+- **La copy generique** ("Unlock the power of", "Seamlessly", "Elevate your"). Texte specifique, concret, a la voix du produit.
+- **Trop de poids de police / polices decoratives**. Type restreint et assume (vncbln : Inter + DM Sans).
+
+ESPRIT : moderne, epure, editorial. Test : si un ecran pourrait etre celui de 20 autres startups, c'est rate. Un detail memorable, une vraie hierarchie, du vide qui respire. Cette liste GRANDIT : quand Vincent dit "ca fait IA" sur un detail, l'ajouter ici.
+
 ## Regles absolues (valables quelle que soit la surface)
 
 - **Reutiliser les composants existants** (`src/components/ui/`). Ne jamais recreer Button/Card/Input/Badge/Modal.
