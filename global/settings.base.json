@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/secrets/**)",
+      "Read(**/.aws/**)",
+      "Read(**/.ssh/**)",
+      "Bash(*STRIPE_SECRET*)",
+      "Bash(*SUPABASE_SERVICE*)"
+    ],
+    "defaultMode": "auto"
+  },
+  "effortLevel": "high",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $HOME/Developer/claude-preset/hooks/typecheck-on-stop.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

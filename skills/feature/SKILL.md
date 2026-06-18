@@ -1,8 +1,10 @@
 ---
 name: feature
-description: Launch the full harness pipeline for complex features. Auto-detected by Claude, not manually invoked.
+description: Utiliser quand une feature touche auth, paiement, donnees sensibles, ou 5+ fichiers structurants. C'est la couche lourde (subagents + double review + audit securite) par-dessus le workflow de vincent-context. Pour le reste (feature courante, UI), c'est vincent-context qui pilote. Declenche automatiquement par Claude, jamais tape a la main.
 ---
 # Harness pipeline
+
+> **Source unique du workflow** : les etapes generales vivent dans le skill `vincent-context` (charge sur tout projet Node). Ce skill n'ajoute QUE la couche XL ci-dessous. Critere de bascule XL : auth / paiement / donnees sensibles / 5+ fichiers.
 
 Ce skill est lance AUTOMATIQUEMENT par Claude quand il detecte une feature complexe.
 Vincent ne le tape jamais manuellement.

@@ -14,7 +14,7 @@ Vincent drives Claude Code to ship code. He is **NOT a developer**. He has stron
 
 ## Behavioral guidelines (Karpathy 4 rules)
 
-Reference: `forrestchang/andrej-karpathy-skills` repo (~127k stars on GitHub at mai 2026, trending #1). Full breakdown in `veille-tech/veille/claude-code/claude-md-karpathy.md`. **Skill `vincent-context`** carries the 8 additional Mnilax rules + workflow feature 10 etapes — loaded on-demand for code projects. **Explicit tradeoff**: these rules bias toward caution over speed. For trivial tasks (typo, rename, one-line fix), use judgment instead of the full ritual.
+Reference: `forrestchang/andrej-karpathy-skills` repo (~127k stars on GitHub at mai 2026, trending #1). Full breakdown in `veille-tech/veille/claude-code/claude-md-karpathy.md`. **Skill `vincent-context`** carries the additional Mnilax rules + the reference feature workflow + the behavioral guardrails (verification by proof, plan-lock before build, 3-fix rule, ambition brake) — loaded on-demand for code projects. **Explicit tradeoff**: these rules bias toward caution over speed. For trivial tasks (typo, rename, one-line fix), use judgment instead of the full ritual.
 
 ### 1. Think before coding — *Don't assume. Don't hide confusion. Surface tradeoffs.*
 
@@ -117,6 +117,10 @@ When 2+ tasks are independent, parallelize. When sequential, chain.
 - If a tool fails, retry or ask the user — do NOT bail out.
 - Always finish what you started. No silent deaths. No unexplained stops.
 
+## FRAICHEUR DES DONNEES EXTERNES
+
+Avant de presenter une donnee externe (offre d'emploi, lien, article, prix), verifier qu'elle est FRAICHE et VIVANTE : WebFetch le lien (repond-il en 200 ?), verifier la date (une offre d'emploi de moins d'une semaine, par exemple). Ne jamais presenter un lien mort ou une donnee perimee comme valide. Vaut pour TOUS les projets, y compris non-code (Vie, Carriere).
+
 ## Auto sync — multi-machine projects
 
 Several repos are shared between Vincent's two Macs (different usernames AND folder names — e.g. `veille-tech` vs `Veille tech`). The SessionStart hook `~/.claude/hooks/git-diagnostic.sh` flags out-of-sync state automatically, matching repos by their **git remote** (portable across machines), NOT by absolute path. Covered repos (by remote name): `claude-preset` (source of truth for skills & config), `veille-tech`, `Carriere`, `Vie`. To add one: edit the `case` on the remote in that hook.
@@ -131,4 +135,4 @@ If the hook doesn't fire (or you're outside these repos), fall back to manual:
 Vincent bosse dans Claude Desktop, ne lit ni le code ni le terminal, decide a l'oeil, brique par brique.
 - Pour faire trancher une decision ou expliquer un concept : ouvrir une page **`/canvas`** (page HTML locale interactive, ephemere, zero trace) plutot qu'un pave terminal. Choix triviaux : `AskUserQuestion`.
 - Explication calibree : toujours une petite explication, ni jargon qui perd, ni ton infantilisant (il connait, il apprend).
-- `/design-flow` route ses gates (explore, revue, gate) via `/canvas`. `/patterns` garde les conventions reutilisables entre projets (`~/.claude/patterns/`).
+- Le front passe par `/design-flow` : exploration dans **Claude Design** (puis Handoff vers Claude Code pour implementer), gates (reference, preuve visuelle, release) via `/canvas`. `/patterns` garde les conventions reutilisables entre projets (`~/.claude/patterns/`).

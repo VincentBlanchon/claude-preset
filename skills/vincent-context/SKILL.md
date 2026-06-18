@@ -1,13 +1,15 @@
 ---
 name: vincent-context
-description: Regles transverses Vincent appliquees a tous ses projets code (Bridge, ClubHouse, AppDiag, CV Virtuel, Funnel, csp-back, PennyLane). Inclut workflow feature 10 etapes obligatoire, design system, em dashes interdits, tests obligatoires, pattern Things That Will Bite You, workflow Git/Codex. A invoquer automatiquement sur tout projet avec package.json (Next, React, RN, SvelteKit, Node).
+description: Regles transverses appliquees a tout projet code de Vincent. A invoquer automatiquement des qu'un projet contient package.json (Next, React, RN, SvelteKit, Node), ou quand Vincent demande une feature/modification significative sur un projet existant. Porte le workflow feature de reference, la verification par preuve visuelle, les garde-fous comportementaux, le front (via Claude Design), Git/Codex.
 ---
 
 # Vincent Context — Regles transverses
 
 Si tu lis ce skill, **respecte ces regles meme si elles ne sont pas dans le CLAUDE.md projet**.
 
-## Workflow feature OBLIGATOIRE
+## Workflow feature (source unique)
+
+> C'est LA reference du workflow. Le skill `feature` ne le re-decrit pas : il ajoute seulement la couche lourde (subagents, double review, audit securite) pour les features XL (auth / paiement / donnees sensibles / 5+ fichiers).
 
 Quand Vincent demande une feature ou modification significative, suis dans l'ordre :
 
@@ -23,12 +25,29 @@ Quand Vincent demande une feature ou modification significative, suis dans l'ord
 10. **Verif visuelle** : Computer Use prio, Playwright fallback. Screenshots.
 11. **PR** : description claire + screenshots.
 
-## Design system
+## Plan verrouille avant tout build
 
-- Utilise TOUJOURS `src/components/ui/`. Ne redesigne JAMAIS un composant existant.
-- Si un composant manque, crees-le dans ui/ d'abord, puis utilise-le.
-- DESIGN.md du projet prime sur les suggestions.
-- **ClubHouse specifique** : Pencil pour le design (Vincent), Claude integre uniquement.
+Des qu'un changement touche 2+ fichiers ou une UI visible : pose le plan dans `/canvas` et ATTENDS le "Go" de Vincent. RIEN ne s'ecrit avant (scaffolder = ecrire = bloque). Sa pire friction : "t'as lance sans que je valide".
+Le plan a deux audiences, ne pas les melanger :
+- Le .md de travail (pour l'agent executant) : chemins de fichiers EXACTS, noms de fonctions/composants EXACTS, zero placeholder. Si tu ne sais pas, tu DEMANDES.
+- Le `/canvas` (pour Vincent) : briques en langage produit + vrais tradeoffs, zero jargon technique.
+
+## Verification avant de dire "c'est fait"
+
+Ne JAMAIS dire "fait / corrige / ca marche" sans avoir, DANS CE MESSAGE :
+1. Lance la commande de verif (test / build / lint) et lu l'output ET l'exit code.
+2. Pour une UI : pris un SCREENSHOT FRAIS du rendu reel et MONTRE-le dans `/canvas`. La preuve que Vincent lit, c'est l'image, pas le terminal.
+3. Si un subagent a bosse : verifie SON DIFF GIT, pas son rapport (il finit toujours vite).
+Mots bannis avant preuve : "should", "probably", "devrait", "normalement".
+Si une verif ECHOUE : n'affiche jamais le terminal brut a Vincent. Ouvre `/canvas` mode EXPLAIN ("voici ce qui casse, en clair, je propose X").
+
+## Design system + front
+
+- Le front est la PRIORITE de Vincent (moderne, epure, exigeant). Le flux complet vit dans le skill `design-flow`.
+- **Surface de design : Claude Design par defaut** (Vincent explore, puis "Handoff to Claude Code", on implemente). Quota separe : si epuise, basculer Pencil ou build direct, et le prevenir. Pencil reste dispo s'il prefere piloter (ex ClubHouse).
+- Utilise TOUJOURS `src/components/ui/`. Ne redesigne JAMAIS un composant existant. S'il manque, crees-le dans ui/ d'abord.
+- DESIGN.md du projet prime. Ses couleurs/polices sont OK, ne pas les remettre en cause.
+- **Preuve visuelle obligatoire** apres toute modif UI (screenshot frais montre dans `/canvas`).
 
 ## Texte produit
 
@@ -42,6 +61,11 @@ Quand Vincent demande une feature ou modification significative, suis dans l'ord
 - Jamais marquer une tache terminee sans tests passants.
 - TDD encourage : test qui reproduit le bug, puis le faire passer.
 - Ne JAMAIS faire passer un test en cassant le vrai usage.
+
+## Debug : trouve la cause + regle des 3 fixes
+
+Trouve la cause AVANT de patcher (lis l'erreur en entier, reproduis, regarde le git diff recent). Un fix qui marche "par hasard" en cache un autre.
+Regle des 3 fixes : si 3 tentatives de fix echouent, STOP, n'en tente pas un 4e. Ce n'est probablement pas l'hypothese, c'est l'approche. Explique dans `/canvas` (EXPLAIN) et propose de repenser. Evite les 2h de patches en boucle qui font chauffer la machine.
 
 ## Things That Will Bite You — meta-regle
 
@@ -58,6 +82,26 @@ Limite : 10 entrees max par projet. Si plus, demander a Vincent de prioriser/arc
 - Conventional commits en anglais (`feat: add login`).
 - PR : description + screenshots si UI + tests mentionnes.
 - **Jamais `--no-verify`** (bloque par hook).
+
+## Frein a l'ambition
+
+Si une demande empile de la complexite au-dela du besoin reel : DIS-LE avant d'accompagner. "Je trouve ca too much, on peut faire plus simple en faisant X." Test : un senior dirait-il que c'est sur-engineere ?
+Variante visuelle/3D (CV-Virtuel, vncbln) : si un rendu lourd, des animations lourdes ou une video vont faire chauffer/crasher la machine ou exploser le temps de render, PREVIENS du cout et propose la version legere. Vincent regrette l'escalade apres coup.
+
+## Repondre a une review (Codex / Opus)
+
+Pas d'acquiescement performatif ("tu as raison !"). Evalue techniquement, pousse si le reviewer a tort. Avant d'implementer une suggestion "propre" : grep le codebase, si pas utilise (YAGNI), propose de ne pas l'ajouter.
+Ordre impose : conformite a la demande D'ABORD (rien en moins, rien en trop), qualite ENSUITE.
+Double review (Codex spec + Opus qualite) SEULEMENT sur le code a risque : logique metier, auth, paiement, donnees sensibles. UI / CSS : une seule passe suffit.
+
+## Cloture d'une feature
+
+Feature terminee → verif d'abord (build + lint + tests). Rouge → STOP, explique dans `/canvas`, aucune cloture proposee. Vert → propose dans `/canvas` 4 options :
+1. **Merge local + cleanup** (RECO PAR DEFAUT : fusionne dans la base, supprime branche + worktree).
+2. **Push + PR** (description + screenshots).
+3. **Garder tel quel**.
+4. **Jeter** (exige que Vincent tape "discard").
+Jamais `git push --force`, jamais sur main. Puis soulage la machine : liste les serveurs/process lourds que TU as lances, identifie le PID precis (lsof sur le port), propose "Process X (PID Y) tourne encore, je coupe ? (Y/N)". JAMAIS killall/pkill.
 
 ## Long-running tasks — `/goal`
 
@@ -78,3 +122,9 @@ Pas pour "make it better" ambigu — definir le critere d'abord.
 - Push direct sur main
 - Em dashes dans texte produit
 - Redesigner composant ui/ existant
+- Dire "c'est fait" sans preuve (output de commande + screenshot UI)
+- Lancer un build/scaffold avant le "Go" de Vincent sur le plan
+
+## Journal de friction (capture passive)
+
+Quand Vincent exprime une friction verbatim ("c'est nul", "supprime tout", "trop", "tu devines", "ca chauffe", "t'as lance sans valider") : note-la, datee, dans la memoire (`feedback_friction_log`), SANS interrompre la tache. Quand il dit "fais le point sur mon workflow" : relis ce journal, regroupe les frictions recurrentes, propose dans `/canvas` quel garde-fou durcir.
