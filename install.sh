@@ -73,7 +73,7 @@ echo "[6/7] Rules globales..."
 if [ -d "$SCRIPT_DIR/rules" ]; then
   mkdir -p "$CLAUDE_DIR/rules"
   cp "$SCRIPT_DIR/rules/"*.md "$CLAUDE_DIR/rules/" 2>/dev/null || true
-  echo "  -> rules installees (git-workflow, qualite, securite)"
+  echo "  -> rules installees (git-workflow, qualite, securite, frontend-aesthetics)"
 else
   echo "  -> dossier rules absent (skip)"
 fi

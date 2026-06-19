@@ -54,6 +54,20 @@ BANNIR :
 
 ESPRIT : moderne, epure, editorial. Test : si un ecran pourrait etre celui de 20 autres startups, c'est rate. Un detail memorable, une vraie hierarchie, du vide qui respire. Cette liste GRANDIT : quand Vincent dit "ca fait IA" sur un detail, l'ajouter ici.
 
+## Anti-slop : creer du caractere (la methode, pas que les interdits)
+
+Bannir les tells (ci-dessus) evite le pire, ca ne cree pas le beau. La methode officielle Anthropic, reproductible sans etre designer :
+
+**1. Un design plan AVANT de coder (2 passes).**
+- Passe 1 : 4 a 6 couleurs nommees + 2 roles de typo (une display a caractere, utilisee avec RETENUE + une de texte) + UN seul element SIGNATURE (la seule chose memorable de l'ecran).
+- Passe 2 (auto-critique) : "ce plan ressemble-t-il a ce que je sortirais pour n'importe quel site du meme genre ?" Si oui, reviser avant de coder.
+
+**2. Regle d'or : depenser l'audace a UN seul endroit.** L'element signature porte le caractere, le reste reste calme. L'accumulation d'effets (animations, degrades, glass) fait "sentir l'IA". Retire un accessoire avant de livrer (Chanel).
+
+**3. Donner une direction a l'oeil** : choisir une FAMILLE esthetique nommee (Editorial Minimalism, Terminal-Core, Warm Editorial, Cinematic Dark, Data-Dense Pro, Neon Brutalist) plutot que subir le defaut ; referencer des marques reelles ("comme Linear, Stripe, A24") en disant POURQUOI ca marche ; contraintes negatives explicites dans le prompt.
+
+Ces 3 leviers alimentent aussi le **seed du design system Claude Design** (Do's/Don'ts), codebase lie : c'est ce qui tue le rendu generique des le premier ecran.
+
 ## Regles absolues (valables quelle que soit la surface)
 
 - **Reutiliser les composants existants** (`src/components/ui/`). Ne jamais recreer Button/Card/Input/Badge/Modal.
@@ -82,7 +96,7 @@ Trois entrees possibles, detecter laquelle :
 
 Construire production-ready, aux tokens DESIGN.md, en reutilisant les composants `ui/`.
 
-- **Gout / anti-slop via le skill officiel `frontend-design`** (a activer via `/plugins`). Objectif : moderne, epure, un point de vue. Typographies distinctives, palette assumee, au moins un detail memorable. **Test anti-slop (OUI a tout)** : CTA visible sans scroller ? hierarchie claire ? un choix specifique au produit (pas interchangeable avec 20 startups) ? l'interface sert le contenu ?
+- **Gout / anti-slop : methode internalisee** (voir "Anti-slop : creer du caractere" ci-dessus + la rule globale `frontend-aesthetics`). Le skill plugin `frontend-design` est en cache PERIME sur la machine de Vincent : ne pas s'appuyer dessus, la methode vit desormais dans le preset. Objectif : moderne, epure, un point de vue. Typographies distinctives, palette assumee, au moins un detail memorable. **Test anti-slop (OUI a tout)** : CTA visible sans scroller ? hierarchie claire ? un choix specifique au produit (pas interchangeable avec 20 startups) ? l'interface sert le contenu ?
 - **Etats + accessibilite DES le build** (pas a l'audit) : etats **erreur / vide / chargement**, **touch targets >= 44px**, **contraste WCAG AA**, **focus visible**. Penser le PARCOURS complet, pas juste l'ecran heureux.
 - Micro-interactions CSS (hover/focus/active), transitions 150-300ms ease-out.
 
@@ -112,5 +126,6 @@ Verdict final **visuel** (jamais de "COMPLETE" automatique). Recap : brief respe
 
 - **Tous les gates passent par `/canvas`** (reference comprise, preuve visuelle, recos, gate). Voir le skill `/canvas` pour la mecanique.
 - **Visuels / assets (posters, images, PNG)** != UI d'app. Pour ca, capacite de design natif de Claude (artifacts), pas ce flux.
+- **Re-thematiser a l'oeil (no-code)** : si le projet est sur shadcn/ui, `tweakcn` (editeur de theme visuel) change toute l'identite via les CSS variables sans toucher au code, puis exporte les tokens.
 - Si la feature est XL (auth/paiement/donnees/5+ fichiers), c'est `vincent-context` qui porte le workflow global et appelle ce flux pour la partie front.
 - Argument optionnel : `/design-flow <page/composant>` cible directement cet ecran.
