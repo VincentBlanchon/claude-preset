@@ -1,13 +1,20 @@
 ---
 name: design-flow
-description: Flux front de Vincent. A utiliser des qu'il demande de creer ou modifier une page, un ecran, une modale, un composant, ou toute UI visible. Vincent ne designe dans AUCUN outil (ni Figma, ni Pencil, ni Claude Design) : Claude PRODUIT le front, Vincent dirige a l'oeil via /canvas. Le but : du front propre, pas du "full IA".
+description: Flux front de Vincent. A utiliser des qu'il demande de creer ou modifier une page, un ecran, une modale, un composant, ou toute UI visible. Par defaut Claude PRODUIT le front et Vincent dirige a l'oeil via /canvas (du propre sans effort). Option Figma (MCP) quand Vincent veut designer lui-meme et monter en competence. Le but : du front propre, pas du "full IA".
 ---
 
 # /design-flow — Du front propre sans etre designer, sans outil de design
 
-Vincent est **non-dev, non-designer, bosse dans Claude Desktop, decide a l'oeil**. Son probleme reel : **il n'arrive pas a sortir du front propre**, et il ne veut **aucun outil de design** (Figma/Pencil/Claude Design = abandonnes). 
+Vincent est **non-dev, non-designer, bosse dans Claude Desktop, decide a l'oeil**. Son probleme reel : **il n'arrive pas a sortir du front propre**. La solution par defaut ne demande **aucun outil**. Mais Vincent **veut aussi apprendre Figma** : il est donc dispo en **option** (voir "Deux entrees").
 
 **Le principe : Claude produit le front, Vincent dirige a l'oeil.** Il ne touche jamais a un outil de design ni au code. Il regarde, il dit "plus aere / ce bouton trop gros / j'aime pas ce bloc", Claude ajuste. Le "propre" ne vient pas d'un outil, il vient de **4 leviers** ci-dessous. C'est tout le secret.
+
+## Deux entrees (Vincent choisit selon l'envie)
+
+- **A. Defaut — Claude produit, Vincent dirige.** Pour quand il veut juste du propre, vite. Vincent decrit / pointe une reference, Claude code, Vincent juge a l'oeil dans `/canvas` et ajuste. Zero outil.
+- **B. Option Figma — Vincent designe, Claude implemente.** Pour quand Vincent VEUT manipuler lui-meme et **monter en competence sur Figma** (un de ses objectifs). Il maquette dans Figma, Claude lit via le MCP Figma (`get_design_context`, `get_variable_defs`, `get_screenshot`) et implemente. Bosser dans l'org **"Les Fabricants"** (siege Dev = MCP debloque) ; **`/figma-use` avant tout `use_figma`**. Faire progresser Vincent pas a pas, ne pas le noyer.
+
+Les DEUX passent par les memes garde-fous qualite ci-dessous (leviers + anti-slop + boucle visuelle). Le choix de l'entree ne change rien a l'exigence de "propre".
 
 ## Les 4 leviers du front propre (l'anti-"full IA")
 
@@ -65,5 +72,5 @@ Claude le lit en premier sur toute tache front et s'y tient. Les couleurs/police
 
 ## Notes
 - Tous les gates passent par `/canvas`. Vincent ne voit jamais de terminal ni de code.
-- AUCUN outil de design externe. Si Vincent veut un jour manipuler lui-meme, on reverra (Pencil reste un candidat), mais par defaut : Claude produit, Vincent dirige.
+- Par defaut, aucun outil (Claude produit, Vincent dirige). L'option Figma (entree B) est la quand Vincent veut designer / apprendre Figma. Pencil reste un candidat alternatif s'il prefere un jour.
 - Feature XL (auth/paiement/donnees/5+ fichiers) : `vincent-context` porte le workflow et appelle ce flux pour le front.
