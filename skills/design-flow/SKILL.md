@@ -57,6 +57,21 @@ Par defaut (sauf si le DESIGN.md le demande) : pas de **pilules** (radius 9999px
 - **Regle de la 3e gen** : si apres 3 tours un ecran ne converge pas, le probleme est le DESIGN.md flou ou la reference manquante, pas la generation. On remonte d'un cran.
 - **References imposees** avant generation : pas de nouvel ecran-type sans 2-3 refs reelles. "Inspire-toi de mon gout" ne suffit pas.
 
+## Le max-du-max (leviers verifies, juin 2026)
+
+**Token sync 1:1 (le geste anti-generique n°1).** Nommer les Variables Figma EXACTEMENT comme shadcn (`primary`, `primary-foreground`, `background`, `muted`, `border`, `ring`…), Light + Dark, en OKLCH. Les exporter en CSS (`:root` / `.dark` / `@theme inline`) dans `globals.css`. Le MCP lit `get_variable_defs` → Claude code `bg-primary`, jamais `bg-[#1a1a2e]`. Verrouiller les tokens AVANT de generer le moindre ecran.
+
+**Le CLAUDE.md de regles = le "Code Connect" du solo.** Le vrai Code Connect (mapper composants Figma <-> code) exige un plan Org/Enterprise + un CLI a maintenir → PAS pour un solo. A la place : une regle ecrite dans le CLAUDE.md du projet — "pour tout composant Figma, utilise l'equivalent shadcn dans `components/ui/`, jamais un clone". ~95% du benefice, zero infra. Template pret : `templates/claude-md-front.md`.
+
+**Les 5 pro-tips quotidiens :**
+- Dev Mode → "Copy link to selection" sur le frame (jamais le panneau Design).
+- Composant par composant, ordre atomic (atomes → molecules → organismes). Jamais la page entiere (le MCP tronque les gros frames).
+- Icones en SVG dans le projet (lucide vient avec shadcn) — les demander au MCP = bugs.
+- Prompts avec negatifs explicites ("grille 8px, pas de gradient, pas d'illustration") + une vraie reference esthetique ("Linear rencontre Stripe").
+- Auth via l'app Figma Desktop (le MCP local y tourne).
+
+**Le filtre mental (trier tout futur outil) :** une REGLE ecrite ou un NOM propre dans Figma → pour Vincent tout de suite. Un CLI a installer, un fichier a maintenir, un plan payant superieur → pas pour lui (tooling d'equipe). A IGNORER tant qu'il est solo : Code Connect (vrai), Tokens Studio + automation Git, la boucle retour Figma.
+
 ## Notes
 - Figma = surface de design ; Claude Code = production. Jamais les deux dans la meme conversation.
 - Tous les gates passent par `/canvas`. Vincent ne lit ni code ni terminal.
