@@ -44,7 +44,7 @@ Si une verif ECHOUE : n'affiche jamais le terminal brut a Vincent. Ouvre `/canva
 ## Design system + front
 
 - Le front est la PRIORITE de Vincent (moderne, epure, exigeant). Le flux complet vit dans le skill `design-flow`.
-- **Surface de design : Claude Design par defaut** (Vincent explore, puis "Handoff to Claude Code", on implemente). Quota separe : si epuise, basculer Pencil ou build direct, et le prevenir. Pencil reste dispo s'il prefere piloter (ex ClubHouse).
+- **Vincent ne designe dans AUCUN outil (ni Figma, ni Pencil, ni Claude Design).** Claude PRODUIT le front, Vincent dirige a l'oeil. Le "propre" vient de 4 leviers (jamais partir de zero = lib de composants polie, toujours une vraie reference, skill officiel `frontend-design`, boucle visuelle via /canvas) detailles dans le skill `design-flow`.
 - Utilise TOUJOURS `src/components/ui/`. Ne redesigne JAMAIS un composant existant. S'il manque, crees-le dans ui/ d'abord.
 - DESIGN.md du projet prime. Ses couleurs/polices sont OK, ne pas les remettre en cause.
 - **Preuve visuelle obligatoire** apres toute modif UI (screenshot frais montre dans `/canvas`).
