@@ -48,6 +48,7 @@ Si une verif ECHOUE : n'affiche jamais le terminal brut a Vincent. Ouvre `/canva
 - Utilise TOUJOURS `src/components/ui/`. Ne redesigne JAMAIS un composant existant. S'il manque, crees-le dans ui/ d'abord.
 - DESIGN.md du projet prime. Ses couleurs/polices sont OK, ne pas les remettre en cause.
 - **Preuve visuelle obligatoire** apres toute modif UI (screenshot frais montre dans `/canvas`).
+- **Anti-slop = methode, pas que des interdits** : design plan en 2 passes (palette + typo + UN element signature, puis auto-critique "ca ressemble a 20 autres ?"), audace a un seul endroit (Chanel), familles esthetiques nommees + references reelles (Linear, Stripe...). Detail : rule globale `frontend-aesthetics` + skill `design-flow`.
 
 ## Texte produit
 
