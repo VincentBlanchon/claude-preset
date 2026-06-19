@@ -1,76 +1,63 @@
 ---
 name: design-flow
-description: Flux front de Vincent. A utiliser des qu'il demande de creer ou modifier une page, un ecran, une modale, un composant, ou toute UI visible. Par defaut Claude PRODUIT le front et Vincent dirige a l'oeil via /canvas (du propre sans effort). Option Figma (MCP) quand Vincent veut designer lui-meme et monter en competence. Le but : du front propre, pas du "full IA".
+description: Flux front de Vincent. A utiliser des qu'il demande de creer ou modifier une page, un ecran, une modale, un composant, ou toute UI visible. Vincent COMPOSE dans Figma (il deplace des formes, c'est sa creativite), Claude lit via le MCP Figma et code en vrai (React/Tailwind/shadcn), soigne. L'oeil de Vincent juge le beau ; les gates passent par /canvas.
 ---
 
-# /design-flow — Du front propre sans etre designer, sans outil de design
+# /design-flow — Le front : Figma + Claude
 
-Vincent est **non-dev, non-designer, bosse dans Claude Desktop, decide a l'oeil**. Son probleme reel : **il n'arrive pas a sortir du front propre**. La solution par defaut ne demande **aucun outil**. Mais Vincent **veut aussi apprendre Figma** : il est donc dispo en **option** (voir "Deux entrees").
+Vincent est **non-dev, ultra-perfectionniste sur le front, decide a l'oeil**. Il a un **abonnement Figma Full** (design + Dev Mode/MCP). **Son envie, ferme et definitive : composer ses pages dans Figma** (deplacer des cubes/textes/zones, facon Canva, ajouter/enlever/reorganiser), et que **Claude code a partir de ca**. C'est un travail A DEUX : Vincent designe, Claude implemente. **La machine ne juge JAMAIS le beau a sa place** — c'est l'oeil de Vincent, et c'est la raison d'etre de Figma ici.
 
-**Le principe : Claude produit le front, Vincent dirige a l'oeil.** Il ne touche jamais a un outil de design ni au code. Il regarde, il dit "plus aere / ce bouton trop gros / j'aime pas ce bloc", Claude ajuste. Le "propre" ne vient pas d'un outil, il vient de **4 leviers** ci-dessous. C'est tout le secret.
+## Regle d'or
 
-## Deux entrees (Vincent choisit selon l'envie)
+**Ne JAMAIS designer ET coder dans la meme conversation.** Figma = la surface de design (Vincent compose). Claude Code = la production (implemente le vrai code). La frontiere, c'est le MCP. Melanger = perdre des heures.
 
-- **A. Defaut — Claude produit, Vincent dirige.** Pour quand il veut juste du propre, vite. Vincent decrit / pointe une reference, Claude code, Vincent juge a l'oeil dans `/canvas` et ajuste. Zero outil.
-- **B. Option Figma — Vincent designe, Claude implemente.** Pour quand Vincent VEUT manipuler lui-meme et **monter en competence sur Figma** (un de ses objectifs). Il maquette dans Figma, Claude lit via le MCP Figma (`get_design_context`, `get_variable_defs`, `get_screenshot`) et implemente. Bosser dans l'org **"Les Fabricants"** (siege Dev = MCP debloque) ; **`/figma-use` avant tout `use_figma`**. Faire progresser Vincent pas a pas, ne pas le noyer.
+## Phase 0 — Le design system dans Figma (une fois par projet)
 
-Les DEUX passent par les memes garde-fous qualite ci-dessous (leviers + anti-slop + boucle visuelle). Le choix de l'entree ne change rien a l'exigence de "propre".
+Le levier n°1 anti-generique : Figma et le code parlent les MEMES tokens.
+- Poser les **Variables Figma** : couleurs (semantiques : primary/muted/destructive…), echelle d'espacement, typo, radius. + un **`DESIGN.md`** miroir a la racine du repo (la reference ecrite).
+- Si le projet a deja des composants : **lier le codebase** dans Figma (Import → le dossier des composants, pas tout le repo) pour que Figma rejoue le style existant.
+- Tokens shadcn en **OKLCH** + `@theme` Tailwind v4 cote code, memes valeurs que les Variables Figma.
+- **Gate `/canvas`** : Vincent valide le systeme (palette + echelles cote a cote) avant qu'on genere un ecran. Ses couleurs/polices sont OK, ne pas les remettre en cause.
 
-## Les 4 leviers du front propre (l'anti-"full IA")
+## Phase 1 — Vincent compose la page dans Figma (sa creativite)
 
-**1. JAMAIS partir de zero.** "Page blanche + fais joli" = la machine a slop. Toujours demarrer de :
-- une **lib de composants polie** deja installee (shadcn/ui en priorite ; sinon Untitled UI, etc.). Reutiliser `src/components/ui/`, ne jamais recreer Button/Card/Input.
-- le **DESIGN.md du projet** (tokens + direction). S'il n'existe pas, le creer une fois (voir plus bas).
+C'est SON espace. Trois entrees possibles :
+- **Reference** : Vincent pointe un site qu'il aime → `generate_figma_design` (code-to-canvas) le transforme en **calques editables** qu'il rearrange.
+- **From scratch** : il pose ses blocs/zones/textes a l'oeil, depuis un kit (Community : shadcn kit, Untitled UI).
+- **Je lui genere une base** dans son Figma (`use_figma` — **invoquer la skill `/figma-use` AVANT**), qu'il reorganise ensuite a l'oeil.
+Bonnes habitudes a encourager (sans le bloquer) : **nommer les calques clairement** (les noms suivent jusqu'au code : `bouton-principal`, pas `Rectangle 3`), utiliser les Variables du design system, penser les **etats** (vide/erreur/chargement).
 
-**2. TOUJOURS partir d'une vraie reference.** Le generique vient de "j'invente". La parade : Vincent pointe **un vrai site qu'il aime** ("fais le hero comme Linear", "ce pricing comme Stripe"). Claude l'ouvre (Claude_in_Chrome), lit la structure / le scroll / les espacements, et **reprend le parti-pris** (pas un copier-coller : il l'adapte aux tokens du projet). Si Vincent n'a pas de reference, lui en proposer 2-3 (vrais sites shippes du meme secteur) avant de coder. Partir d'un vrai design qui marche bat toute generation a partir de rien.
+## Phase 2 — Claude lit la frame via le MCP et code en vrai
 
-**3. Le skill officiel `frontend-design` est le moteur de gout.** L'activer sur TOUTE tache front (il est installe : `frontend-design@claude-plugins-official`). C'est l'outil concu par Anthropic pour produire du front distinctif et eviter l'esthetique IA generique. Si une UI sort fade, c'est souvent qu'on ne l'a pas sollicite.
+- Lire : `get_design_context` (structure/layout) + `get_variable_defs` (tokens) + `get_screenshot` (le rendu vise). Referencer les composants **par leur nom Figma**.
+- Implementer en **React/Tailwind/shadcn**, **aux tokens du repo** (jamais de hex en dur, jamais de valeur inventee), en reutilisant `src/components/ui/`.
+- **Le soin que Vincent exige (non-negociable)** : spacing maitrise (echelle de tokens, pas de valeur au pif) ; **micro-animations** sobres (Motion : hover/focus/transitions 150-300ms, sous-menus soignes) ; **zero composant par defaut non personnalise** (pas de shadcn brut violet) ; etats erreur/vide/chargement ; a11y (contraste AA, focus, 44px).
+- Activer le skill officiel **`frontend-design`** (anti-AI-slop) sur toute tache front.
 
-**4. La boucle visuelle (Vincent dirige a l'oeil).** Apres chaque build : **screenshot frais du rendu reel montre dans `/canvas`** (jamais "c'est fait" sans image). Vincent regarde et dirige en langage produit ("plus d'air", "ce bloc en premier", "trop de bordures"). Claude applique, re-screenshote. On itere jusqu'a ce que ce soit beau a SON oeil. Lui ne lit ni code ni terminal.
+## Phase 3 — La boucle a l'oeil (Vincent juge le beau)
 
-## Anti-AI-slop : les tells a bannir (signature "full IA" interdite)
+- Claude rend → **screenshot frais dans `/canvas`**. Jamais "c'est fait" sans l'image.
+- Vincent dirige en langage produit ("plus d'air", "ce bloc plus bas", "le CTA doit dominer") OU **retourne rearranger dans Figma** et on re-handoff. Son oeil tranche le beau, point.
+- Quand un composant lui plait, le **promouvoir dans `src/components/ui/`** (sa lib enrichie de SES variantes) → le prochain ecran le reutilise, l'effort decroit.
 
-Vincent reconnait et DETESTE le look "genere par IA". INTERDITS par defaut (sauf si le DESIGN.md le demande) :
-- **Pilules** (border-radius pleine rondeur / 9999px). Radius du projet (vncbln : 8px, carre sobre).
-- **Bordures epaisses / tout-encadre**. Separer par l'espace, un fond teinte, un filet 1px discret.
-- **Degrades** (surtout violet/indigo "gradient IA"). Aplats, couleurs franches.
-- **Blur / glassmorphism**. Surfaces nettes.
-- **Ombres molles / glow**. Rares et subtiles, ou aucune.
-- **Em dashes (—)** dans les textes. Virgule, point, parentheses.
-- **Emojis en puces ou titres**. Puces sobres.
-- **Accent violet/indigo par defaut** (shadcn brut non personnalise). Palette du projet (vert olive + terracotta).
-- **Tout centre** (hero centre + 2 pilules + degrade = la landing IA type). Asymetrique, editorial, du vide assume.
-- **Copy generique** ("Unlock the power of", "Seamlessly", "Elevate your"). Concret, voix du produit.
-- **Trop de poids de police / polices decoratives**. Type restreint (Inter + DM Sans).
+## Anti-AI-slop : les tells a bannir
 
-ESPRIT : moderne, epure, editorial. Test : si un ecran pourrait etre celui de 20 autres startups, c'est rate. Cette liste GRANDIT : quand Vincent dit "ca fait IA", l'ajouter.
+Par defaut (sauf si le DESIGN.md le demande) : pas de **pilules** (radius 9999px → 8px sobre), pas de **bordures epaisses/tout-encadre**, pas de **degrades** (violet IA), pas de **blur/glassmorphism**, pas d'**ombres molles/glow**, pas d'**em dashes** ni d'**emojis** en puces/titres, pas d'**accent violet shadcn brut**, pas de **hero centre generique**, pas de **copy fade** ("Unlock the power of"). Palette beige/vert/terracotta, Inter + DM Sans. Test : si un ecran pourrait etre celui de 20 autres startups, c'est rate. La liste GRANDIT (quand Vincent dit "ca fait IA", l'ajouter).
 
-## Le DESIGN.md du projet (une fois par projet)
+## Setup (a verifier/installer une fois)
 
-Pour que Claude ait le style de Vincent au lieu d'inventer, poser a la racine un `DESIGN.md` court :
-- **Couleurs** (variables + hex), **typo** (familles + echelle), **radius/spacing**, **direction** (1 phrase : "editorial chaud, beige/vert/terracotta, sobre").
-- **Do's & Don'ts** = la liste anti-slop ci-dessus.
-Claude le lit en premier sur toute tache front et s'y tient. Les couleurs/polices de Vincent sont OK, ne pas les remettre en cause.
+- **MCP Figma** (Dev Mode) : deja connecte, siege Full OK. Skill **`/figma-use`** avant tout `use_figma`.
+- **shadcn** + son MCP (gratuit) ; **Tailwind v4** (OKLCH, `@theme`).
+- Skill **`frontend-design`** (deja la). **Motion** pour les animations.
+- References imposees : **Mobbin / Refero** (poser 2-3 vraies refs premium avant un nouvel ecran-type).
 
-## Qualite a chaque build (non negociable)
+## Discipline (non-negociable)
 
-- Etats **erreur / vide / chargement** + **a11y** (contraste AA, focus visible, touch >= 44px) DES le build, pas a la fin.
-- Coherence avec les pages existantes (lire avant de coder).
-- Micro-interactions sobres (hover/focus, transitions 150-300ms).
-
-## Le pipeline (rappel)
-
-```
-0. BRIEF court (quel ecran, quelle action, quelle reference ?)
-1. REFERENCE : Vincent pointe un site qu'il aime (ou Claude en propose 2-3). Claude l'analyse.
-2. BUILD : Claude produit le front (frontend-design + lib ui/ + tokens DESIGN.md + anti-slop)
-3. PREUVE : screenshot frais montre dans /canvas
-4. VINCENT DIRIGE a l'oeil ("plus d'air", "j'aime pas ce bloc") -> Claude ajuste -> re-screenshot
-5. AUDIT auto : typecheck + lint + tests + a11y + responsive (375/768/1440)
-6. GATE /canvas : READY / WITH WARNINGS / NOT READY, Vincent decide
-```
+- Iteration **composant par composant**, pas une page entiere d'un coup (un composant valide+promu avant le suivant).
+- **Regle de la 3e gen** : si apres 3 tours un ecran ne converge pas, le probleme est le DESIGN.md flou ou la reference manquante, pas la generation. On remonte d'un cran.
+- **References imposees** avant generation : pas de nouvel ecran-type sans 2-3 refs reelles. "Inspire-toi de mon gout" ne suffit pas.
 
 ## Notes
-- Tous les gates passent par `/canvas`. Vincent ne voit jamais de terminal ni de code.
-- Par defaut, aucun outil (Claude produit, Vincent dirige). L'option Figma (entree B) est la quand Vincent veut designer / apprendre Figma. Pencil reste un candidat alternatif s'il prefere un jour.
+- Figma = surface de design ; Claude Code = production. Jamais les deux dans la meme conversation.
+- Tous les gates passent par `/canvas`. Vincent ne lit ni code ni terminal.
 - Feature XL (auth/paiement/donnees/5+ fichiers) : `vincent-context` porte le workflow et appelle ce flux pour le front.
